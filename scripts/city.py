@@ -123,6 +123,30 @@ PALETTE = {
 }
 
 
+def stars(t: dict, mx: float, my: float, count: int = 30) -> list:
+    """A sky of faint stars, each blinking on its own slow rhythm. Seeded, so the
+    sky stays the same between rebuilds; kept clear of the moon, the figures
+    block (top right) and the skyline (which slopes down to the right)."""
+    rng, out, tries, placed = random.Random(2026), [], 0, []
+    while len(out) < count and tries < 4000:
+        tries += 1
+        x, y = rng.uniform(16, W - 16), rng.uniform(6, 150)
+        if x > W - 300 and y < 172:                 # figures block
+            continue
+        if (x - mx) ** 2 + (y - my) ** 2 < 46 ** 2:  # moon and halo
+            continue
+        if y > 40 + max(0.0, x - 120) * .3:          # stay above the tallest possible rooftops
+            continue
+        if any((x - px) ** 2 + (y - py) ** 2 < 38 ** 2 for px, py in placed):  # even spacing, no clumps
+            continue
+        placed.append((x, y))
+        r = rng.choice([.6, .7, .8, .9, 1.1, 1.3])
+        dur, delay = rng.uniform(4.5, 9), rng.uniform(0, 8)
+        out.append(f'<circle class="star" cx="{x:.1f}" cy="{y:.1f}" r="{r}" fill="{t["butter"]}" '
+                   f'style="animation-duration:{dur:.1f}s;animation-delay:{delay:.1f}s"/>')
+    return out
+
+
 def render(days: list[tuple[dt.date, int]], theme: str, live: bool) -> Doc:
     t = THEMES[theme]
     tiers = PALETTE[theme]
@@ -184,10 +208,7 @@ def render(days: list[tuple[dt.date, int]], theme: str, live: bool) -> Doc:
                         f'<stop offset="1" stop-color="{t["butter"]}" stop-opacity="0"/></radialGradient>'
                         f'<mask id="cres"><rect width="{W}" height="{H}" fill="#fff"/>'
                         f'<circle cx="{mx + 7}" cy="{my - 5}" r="12.5" fill="#000"/></mask>')
-        for sx, sy, sr, sd, sdl in [(128, 22, 1.1, 5.5, 0), (172, 46, .9, 7, 2.1), (40, 70, .8, 6.2, 3.4), (214, 18, .8, 8, 1.2),
-                                    (300, 34, .9, 6.6, 4.4), (380, 14, .7, 7.4, 2.8)]:
-            doc.add(f'<circle class="star" cx="{sx}" cy="{sy}" r="{sr}" fill="{t["butter"]}" '
-                    f'style="animation-duration:{sd}s;animation-delay:{sdl}s"/>')
+        doc.add(*stars(t, mx, my))
         doc.add(f'<circle class="halo" cx="{mx}" cy="{my}" r="30" fill="url(#glow)"/>',
                 f'<circle class="moon" cx="{mx}" cy="{my}" r="13" fill="{t["butter"]}" mask="url(#cres)" opacity=".9"/>')
     else:
