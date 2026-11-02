@@ -23,14 +23,14 @@
 
 </div>
 
-<img align="left" width="200" src="assets/knight.svg" alt="A small horned knight looking around">
+<img align="left" width="200" src="assets/knight.svg" alt="A small horned knight in a lavender scarf, looking around">
 
 <p align="justify">
 I study and build <b>systems that stay correct when some of their participants misbehave</b>: networks where peers lie, markets where traders game the order book, and pipelines where one bad input should never take everything down. My work sits where distributed systems meet security, and most of it is written in Rust.
 </p>
 
 <p align="justify">
-I like the unglamorous parts of engineering: specifying behaviour before writing code, testing properties instead of examples, and publishing every number with the command that produced it. Before software I built aircraft, which taught me that a system is only as good as its least-tested part.
+I like the unglamorous parts of engineering: specifying behaviour before writing code, testing properties instead of examples, and publishing every number with the command that produced it.
 </p>
 
 <p>
@@ -50,8 +50,18 @@ I like the unglamorous parts of engineering: specifying behaviour before writing
 </picture>
 
 <picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/section-work-dark.svg">
+  <img alt="III. Selected Work" src="assets/section-work-light.svg" width="100%">
+</picture>
+
+<a href="https://github.com/medwinjose/crci"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/card-crci-dark.svg"><img alt="CRCI: Byzantine-fault-tolerant gossip for mesh networks in Rust; every node isolates misbehaving peers on its own." src="assets/card-crci-light.svg" width="49%"></picture></a><a href="https://github.com/medwinjose/sentinel"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/card-sentinel-dark.svg"><img alt="SENTINEL: trust and toxicity detection for limit-order-book market-making in Rust; +10,843.99 ticks of adverse-selection cost saved under extreme toxicity (Welch t = 3.50, p = 4.9e-4, 500 seeds)." src="assets/card-sentinel-light.svg" width="49%"></picture></a>
+
+<sub><b>CRCI</b> &nbsp;·&nbsp; preprint <a href="https://doi.org/10.5281/zenodo.23032042">doi:10.5281/zenodo.23032042</a></sub><br>
+<sub><b>SENTINEL</b> &nbsp;·&nbsp; <a href="https://github.com/medwinjose/sentinel/blob/master/engine/benches/results/sweep_results.csv">500-seed results</a>, produced by <code>cargo test --release -p sentinel-agents --test ecology_stats</code></sub>
+
+<picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/section-city-dark.svg">
-  <img alt="III. The City" src="assets/section-city-light.svg" width="100%">
+  <img alt="IV. The City" src="assets/section-city-light.svg" width="100%">
 </picture>
 
 <picture>

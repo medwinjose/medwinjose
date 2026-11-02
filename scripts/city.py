@@ -26,7 +26,7 @@ W, H = 840, 416
 U = (12.2, 3.55)    # screen offset of one week step
 V = (-10.4, 5.25)   # screen offset of one weekday step
 MAX_H = 112
-LOOP = 18           # seconds per rebuild cycle of the skyline
+LOOP = 7            # seconds per rebuild cycle of the skyline
 GAP = 0.13          # inset of each building inside its block
 
 QUERY = """query($login: String!) { user(login: $login) { contributionsCollection { contributionCalendar {
@@ -162,10 +162,10 @@ def render(days: list[tuple[dt.date, int]], theme: str, live: bool) -> Doc:
 .b   {{ transform-box: fill-box; transform-origin: 50% 100%; animation: build {LOOP}s linear infinite both; }}
 @keyframes build {{
   0%   {{ transform: scaleY(0); opacity: 0; animation-timing-function: cubic-bezier(.2,.8,.25,1) }}
-  1.5% {{ opacity: 1 }}
-  6%   {{ transform: scaleY(1); opacity: 1 }}
-  93%  {{ transform: scaleY(1); opacity: 1; animation-timing-function: cubic-bezier(.5,0,.75,0) }}
-  98%, 100% {{ transform: scaleY(0); opacity: 0 }} }}
+  3%   {{ opacity: 1 }}
+  11%  {{ transform: scaleY(1); opacity: 1 }}
+  88%  {{ transform: scaleY(1); opacity: 1; animation-timing-function: cubic-bezier(.5,0,.75,0) }}
+  96%, 100% {{ transform: scaleY(0); opacity: 0 }} }}
 .g   {{ animation: fade 1.4s ease-out both; }}
 .tw  {{ animation: twinkle ease-in-out infinite; }}
 @keyframes twinkle {{ 0%, 100% {{ opacity: .15 }} 45%, 60% {{ opacity: .95 }} }}
@@ -236,7 +236,7 @@ def render(days: list[tuple[dt.date, int]], theme: str, live: bool) -> Doc:
                         cls = ' class="tw"'
                         sty = f' style="animation-duration:{rng.uniform(5, 11):.1f}s;animation-delay:{rng.uniform(3, 12):.1f}s"'
                     windows.append(poly(quad, t["window"], f'fill-opacity="{.75 if theme == "dark" else .9}"{cls}{sty}'))
-        delay = .3 + w * .05 + wd * .015  # sweeps left to right, one building after another
+        delay = .3 + w * .036 + wd * .012  # sweeps left to right, one building after another
         doc.add(f'<g class="b" style="animation-delay:{delay:.2f}s">{"".join(faces)}{"".join(windows)}</g>')
 
     # Captions: headline figure top-right, small ledger beneath it.

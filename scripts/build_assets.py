@@ -8,8 +8,9 @@ The contribution city is built separately by scripts/city.py (hourly action).
 from __future__ import annotations
 
 import math
+import random
 
-from svgkit import EASE_OUT, THEMES, Doc, arrow_ne, diamond, fmt, measure
+from svgkit import EASE_OUT, THEMES, Doc, arrow, arrow_ne, diamond, fmt, measure, wrap
 
 W = 840  # Matches the README column; images scale down on smaller screens.
 
@@ -17,10 +18,10 @@ W = 840  # Matches the README column; images scale down on smaller screens.
 # ==========================================================================
 # Masthead
 # ==========================================================================
-TAGLINES = [
-    "Building systems that stay correct when participants misbehave.",
+TAGLINES = [  # none repeat the About text word for word
     "Quietly obsessed with correctness, latency and good typography.",
     "Every claim backed by a benchmark you can rerun.",
+    "Happiest when the proof and the benchmark agree.",
 ]
 
 
@@ -76,7 +77,7 @@ def header(t: dict, theme: str) -> None:
               d.text(cx, 122, line, "serif-i", 19.5, t["soft"], anchor="middle"), "</g>")
 
     d.add('<g class="mt">',
-          d.text(cx, 155, "SYSTEMS  ·  RESEARCH  ·  ENGINEERING", "sans-m", 8.5, t["muted"], anchor="middle", tracking=3.6),
+          d.text(cx, 155, "DISTRIBUTED SYSTEMS  ·  SECURITY  ·  RUST", "sans-m", 8.5, t["muted"], anchor="middle", tracking=3.6),
           "</g>")
     d.save(f"header-{theme}.svg")
 
@@ -112,41 +113,64 @@ def chip(t: dict, theme: str, key: str, label: str, index: int) -> None:
 # One file; the white mask and outlined cloak read on both themes.
 # ==========================================================================
 def knight() -> None:
-    # Tall canvas with the figure vertically centred, so the floated image is
-    # as tall as the About text beside it and the text never wraps underneath.
-    dy = 70
-    d = Doc(320, 440, "A small horned knight looking around curiously")
+    """A small horned knight in a lavender scarf.
+
+    Every 13 seconds it looks left, looks right, tilts its head with a little
+    "?", then has an "aha" moment: happy squinting eyes, a tiny hop and two
+    sparkles. It blinks on its own rhythm. One file; the outlined white mask
+    and cloak read on both themes.
+    """
+    # The canvas is as tall as the About text beside it (so text never wraps
+    # underneath) and the figure is vertically centred inside it.
+    KH = KNIGHT_CANVAS_H
+    dy = KH / 2 - 158
+    d = Doc(320, KH, "A small horned knight in a lavender scarf, looking around curiously")
     mask, eye, cloak, rim, line = "#F8F6FF", "#0F0E17", "#363859", "#A79BF5", "#2B2944"
-    lav, blush, mint = "#B7AAFF", "#FFB4C8", "#93E6CC"
-    d.css.append("""
-.all   { animation: bob 2.8s ease-in-out infinite alternate; }
-@keyframes bob { from { transform: translateY(0) } to { transform: translateY(-5px) } }
-.shadow { transform-box: fill-box; transform-origin: center; animation: shrink 2.8s ease-in-out infinite alternate; }
-@keyframes shrink { from { transform: scaleX(1); opacity: .5 } to { transform: scaleX(.86); opacity: .32 } }
-.head  { transform-box: view-box; transform-origin: 150px 252px; animation: look 11s ease-in-out infinite; }
-@keyframes look {
-  0%, 10%   { transform: none }
-  15%, 30%  { transform: translateX(-5px) rotate(-3deg) }
-  36%, 52%  { transform: translateX(5px) rotate(3deg) }
-  58%, 76%  { transform: rotate(-11deg) }
-  82%, 100% { transform: none } }
-.eyes  { animation: glance 11s ease-in-out infinite; }
-@keyframes glance {
-  0%, 10%   { transform: none }
-  15%, 30%  { transform: translateX(-6px) }
-  36%, 52%  { transform: translateX(6px) }
-  58%, 76%  { transform: translate(-2px, 1px) }
-  82%, 100% { transform: none } }
-.blink { transform-box: fill-box; transform-origin: center; animation: blink 4.6s ease-in-out infinite; }
-@keyframes blink { 0%, 44%, 52%, 100% { transform: none } 48% { transform: scaleY(.08) } }
-.cloak { transform-box: view-box; transform-origin: 150px 246px; animation: sway 2.8s ease-in-out infinite alternate; }
-@keyframes sway { from { transform: skewX(1.6deg) } to { transform: skewX(-1.6deg) } }
-.q     { transform-box: fill-box; transform-origin: 50% 100%; animation: wonder 11s ease-in-out infinite; }
-@keyframes wonder { 0%, 58% { opacity: 0; transform: translateY(6px) scale(.6) }
-  63%, 74% { opacity: 1; transform: none } 79%, 100% { opacity: 0; transform: translateY(-4px) } }
-.mote  { animation: drift linear infinite; }
-@keyframes drift { 0% { transform: translateY(0); opacity: 0 } 15% { opacity: .9 } 100% { transform: translateY(-120px); opacity: 0 } }
-.glow  { transform-box: fill-box; transform-origin: center; animation: breathe 6s ease-in-out infinite; }
+    lav, lav_dk, blush, mint = "#B7AAFF", "#8C7EE6", "#FFB4C8", "#93E6CC"
+    neck_y, scarf_x = 182 + dy, 168  # pivot points (neck, scarf knot) in canvas coordinates
+    d.css.append(f"""
+.all   {{ animation: bob 2.8s ease-in-out infinite alternate; }}
+@keyframes bob {{ from {{ transform: translateY(0) }} to {{ transform: translateY(-5px) }} }}
+.hop   {{ animation: hop 13s ease-in-out infinite; }}
+@keyframes hop {{ 0%, 66% {{ transform: none }} 69% {{ transform: translateY(-9px) }} 72% {{ transform: none }}
+  74.5% {{ transform: translateY(-4px) }} 77%, 100% {{ transform: none }} }}
+.shadow {{ transform-box: fill-box; transform-origin: center; animation: shrink 2.8s ease-in-out infinite alternate; }}
+@keyframes shrink {{ from {{ transform: scaleX(1); opacity: .5 }} to {{ transform: scaleX(.86); opacity: .32 }} }}
+.head  {{ transform-box: view-box; transform-origin: 150px {neck_y:.0f}px; animation: look 13s ease-in-out infinite; }}
+@keyframes look {{
+  0%, 8%    {{ transform: none }}
+  12%, 22%  {{ transform: translateX(-5px) rotate(-3deg) }}
+  28%, 38%  {{ transform: translateX(5px) rotate(3deg) }}
+  44%, 58%  {{ transform: rotate(-11deg) }}
+  64%, 80%  {{ transform: rotate(3deg) }}
+  86%, 100% {{ transform: none }} }}
+.eyes  {{ animation: glance 13s ease-in-out infinite; }}
+@keyframes glance {{
+  0%, 8%    {{ transform: none }}
+  12%, 22%  {{ transform: translateX(-6px) }}
+  28%, 38%  {{ transform: translateX(6px) }}
+  44%, 58%  {{ transform: translate(-2px, 1px) }}
+  64%, 100% {{ transform: none }} }}
+.open  {{ animation: open 13s step-end infinite; }}
+@keyframes open {{ 0% {{ opacity: 1 }} 65% {{ opacity: 0 }} 81% {{ opacity: 1 }} }}
+.happy {{ opacity: 0; animation: happy 13s step-end infinite; }}
+@keyframes happy {{ 0% {{ opacity: 0 }} 65% {{ opacity: 1 }} 81% {{ opacity: 0 }} }}
+@media (prefers-reduced-motion: reduce) {{ .happy {{ display: none }} }}
+.blink {{ transform-box: fill-box; transform-origin: center; animation: blink 4.6s ease-in-out infinite; }}
+@keyframes blink {{ 0%, 44%, 52%, 100% {{ transform: none }} 48% {{ transform: scaleY(.08) }} }}
+.cloak {{ transform-box: view-box; transform-origin: 150px {neck_y - 6:.0f}px; animation: sway 2.8s ease-in-out infinite alternate; }}
+@keyframes sway {{ from {{ transform: skewX(1.6deg) }} to {{ transform: skewX(-1.6deg) }} }}
+.tail  {{ transform-box: view-box; transform-origin: {scarf_x}px {neck_y + 13:.0f}px; animation: flutter 2.2s ease-in-out infinite alternate; }}
+@keyframes flutter {{ from {{ transform: rotate(-7deg) }} to {{ transform: rotate(6deg) }} }}
+.q     {{ transform-box: fill-box; transform-origin: 50% 100%; animation: wonder 13s ease-in-out infinite; }}
+@keyframes wonder {{ 0%, 44% {{ opacity: 0; transform: translateY(6px) scale(.6) }}
+  48%, 57% {{ opacity: 1; transform: none }} 61%, 100% {{ opacity: 0; transform: translateY(-4px) }} }}
+.spark {{ transform-box: fill-box; transform-origin: center; animation: spark 13s ease-out infinite; }}
+@keyframes spark {{ 0%, 65% {{ opacity: 0; transform: scale(.2) rotate(0) }} 69% {{ opacity: 1; transform: scale(1.1) rotate(25deg) }}
+  76% {{ opacity: 1; transform: scale(1) rotate(45deg) }} 81%, 100% {{ opacity: 0; transform: scale(.4) rotate(70deg) }} }}
+.mote  {{ animation: drift linear infinite; }}
+@keyframes drift {{ 0% {{ transform: translateY(0); opacity: 0 }} 15% {{ opacity: .9 }} 100% {{ transform: translateY(-120px); opacity: 0 }} }}
+.glow  {{ transform-box: fill-box; transform-origin: center; animation: breathe 6s ease-in-out infinite; }}
 """)
     d.defs.append(f'<radialGradient id="halo"><stop offset="0" stop-color="{lav}" stop-opacity=".32"/>'
                   f'<stop offset="1" stop-color="{lav}" stop-opacity="0"/></radialGradient>')
@@ -156,40 +180,61 @@ def knight() -> None:
         return (f'<path d="M{m(115)} 116 C{m(106)} 98 {m(100)} 78 {m(106)} 52 C{m(114)} 72 {m(124)} 90 {m(138)} 106 Z" '
                 f'fill="{mask}" stroke="{line}" stroke-width="2.2" stroke-linejoin="round"/>')
 
+    def star(cx, cy, r, color, delay) -> str:
+        k = r * .16
+        path = (f"M{cx} {cy - r} Q{cx + k} {cy - k} {cx + r} {cy} Q{cx + k} {cy + k} {cx} {cy + r} "
+                f"Q{cx - k} {cy + k} {cx - r} {cy} Q{cx - k} {cy - k} {cx} {cy - r} Z")
+        return f'<path class="spark" d="{path}" fill="{color}" style="animation-delay:{delay}s"/>'
+
+    d.add(f'<g transform="translate(0,{dy:.1f})">')
     # Soft halo and drifting motes behind the knight.
-    d.add(f'<g transform="translate(0,{dy})">')
     d.add(f'<circle class="glow" cx="150" cy="160" r="118" fill="url(#halo)"/>')
     for x, y, r, col, dur, delay in [(78, 250, 2.2, lav, 7, 0), (222, 236, 1.8, blush, 8.5, 2.2), (104, 210, 1.5, mint, 6.5, 4),
                                      (204, 268, 2, lav, 9, 1.1), (60, 190, 1.4, blush, 7.5, 5.4), (238, 200, 1.6, mint, 8, 3.3)]:
         d.add(f'<circle class="mote" cx="{x}" cy="{y}" r="{r}" fill="{col}" style="animation-duration:{dur}s;animation-delay:{delay}s"/>')
 
     d.add(f'<ellipse class="shadow" cx="150" cy="271" rx="44" ry="5.5" fill="{lav}" opacity=".45"/>',
-          '<g class="all">',
+          '<g class="all"><g class="hop">',
           # legs
           f'<rect x="136" y="246" width="9" height="20" rx="4" fill="{cloak}" stroke="{rim}" stroke-width="1.2"/>',
           f'<rect x="155" y="246" width="9" height="20" rx="4" fill="{cloak}" stroke="{rim}" stroke-width="1.2"/>',
           # cloak
           f'<g class="cloak"><path d="M124 170 C110 198 103 228 98 254 C116 247 133 254 150 248 C167 254 184 247 202 254 '
           f'C197 228 190 198 176 170 Z" fill="{cloak}" stroke="{rim}" stroke-width="1.4" stroke-linejoin="round"/>'
-          f'<path d="M150 186 V242" stroke="{rim}" stroke-width="1" opacity=".35"/></g>',
+          f'<path d="M150 200 V242" stroke="{rim}" stroke-width="1" opacity=".35"/></g>',
+          # scarf: tail first (behind the knot), then the wrap around the neck
+          f'<g class="tail"><path d="M168 190 C182 198 198 203 214 199 L211 212 C195 216 179 210 166 200 Z" fill="{lav}" '
+          f'stroke="{lav_dk}" stroke-width="1.2" stroke-linejoin="round"/>'
+          f'<path d="M205 201 L203 213" stroke="{blush}" stroke-width="3"/></g>',
+          f'<path d="M118 180 Q150 198 182 180 L184 191 Q150 211 116 191 Z" fill="{lav}" stroke="{lav_dk}" '
+          f'stroke-width="1.2" stroke-linejoin="round"/>',
+          f'<path d="M120 187 Q150 204 180 187" fill="none" stroke="{blush}" stroke-width="2.2" stroke-linecap="round"/>',
           # head: horns, mask, eyes
           '<g class="head">', horn(-1), horn(1),
           f'<path d="M106 136 C106 98 194 98 194 136 C194 170 176 186 150 186 C124 186 106 170 106 136 Z" fill="{mask}" stroke="{line}" stroke-width="2.2"/>',
           f'<path d="M114 160 C122 176 136 182 150 182" fill="none" stroke="#DCD6F2" stroke-width="2" stroke-linecap="round" opacity=".7"/>',
-          '<g class="eyes"><g class="blink">',
+          '<g class="eyes"><g class="open"><g class="blink">',
           f'<ellipse cx="131" cy="143" rx="10.5" ry="16" fill="{eye}"/>',
           f'<ellipse cx="169" cy="143" rx="10.5" ry="16" fill="{eye}"/>',
-          f'<circle cx="127" cy="135" r="2.6" fill="#FFFFFF" opacity=".85"/>',
-          f'<circle cx="165" cy="135" r="2.6" fill="#FFFFFF" opacity=".85"/>',
+          '<circle cx="127" cy="135" r="2.6" fill="#FFFFFF" opacity=".85"/>',
+          '<circle cx="165" cy="135" r="2.6" fill="#FFFFFF" opacity=".85"/>',
           '</g></g>',
+          # happy, squinting eyes for the "aha" moment
+          f'<g class="happy" fill="none" stroke="{eye}" stroke-width="4.5" stroke-linecap="round">'
+          '<path d="M121 147 Q131 133 141 147"/><path d="M159 147 Q169 133 179 147"/></g>',
+          '</g>',
           f'<ellipse cx="121" cy="164" rx="6" ry="3" fill="{blush}" opacity=".55"/>',
           f'<ellipse cx="179" cy="164" rx="6" ry="3" fill="{blush}" opacity=".55"/>',
           '</g>',
-          # a curious little question mark during the head tilt
+          # a curious "?" during the tilt, sparkles during the "aha"
           '<g class="q">', d.text(212, 92, "?", "serif-bi", 34, blush), "</g>",
-          "</g>")
+          star(214, 84, 9, mint, 0), star(90, 100, 6, blush, .15),
+          "</g></g>")
     d.add("</g>")
     d.save("knight.svg")
+
+
+KNIGHT_CANVAS_H = 392  # tuned so the image matches the About text height at GitHub's width
 
 
 # ==========================================================================
@@ -198,16 +243,19 @@ def knight() -> None:
 SECTIONS = [
     ("about", "I.", "About", "A LITTLE ABOUT ME"),
     ("instruments", "II.", "Instruments", "LANGUAGES, SYSTEMS  &  METHODS"),
-    ("city", "III.", "The City", "MY CONTRIBUTIONS, REBUILT EVERY FEW MINUTES"),
+    ("work", "III.", "Selected Work", "TWO SYSTEMS, ONE QUESTION"),
+    # +8: follows a caption ending in a code snippet, whose grey box sits lower than text
+    ("city", "IV.", "The City", "MY CONTRIBUTIONS, REBUILT EVERY FEW MINUTES", 8),
 ]
 
 
-SECTION_TOP = 50  # every section opener carries the same breathing room above it
+SECTION_TOP = 22     # space above a section title; with the previous block it renders as about 44px
+SECTION_BOTTOM = 34  # space below the subtitle; also renders as about 44px, so each title sits centred
 
 
-def section(t: dict, theme: str, key: str, num: str, title: str, sub: str) -> None:
-    top = SECTION_TOP
-    d = Doc(W, top + 70, f"{num} {title}")  # 16px below the subtitle, before the content
+def section(t: dict, theme: str, key: str, num: str, title: str, sub: str, extra_top: int = 0) -> None:
+    top = SECTION_TOP + extra_top
+    d = Doc(W, top + 54 + SECTION_BOTTOM, f"{num} {title}")
     d.css.append(f"""
 .st {{ animation: rise 1.4s {EASE_OUT} .1s both; }}
 .rl {{ transform-box: fill-box; transform-origin: 100% 50%; animation: drawx 1.5s {EASE_OUT} .45s both; }}
@@ -229,6 +277,130 @@ def section(t: dict, theme: str, key: str, num: str, title: str, sub: str) -> No
           f'<g class="ed">{diamond(78, mid, 2.6, fill=t["accent"])}{diamond(W - 78, mid, 2.6, fill=t["accent"])}</g>',
           '<g class="sb">', d.text(W / 2, top + 50, sub, "sans-m", 9, t["muted"], anchor="middle", tracking=3.4), "</g>")
     d.save(f"section-{key}-{theme}.svg")
+
+
+# ==========================================================================
+# Selected work: two cards, each with a small animated motif
+# ==========================================================================
+CW, CH = 420, 300
+
+
+def motif_crci(t: dict) -> str:
+    """A gossip mesh in which one peer misbehaves and its neighbours cut it off."""
+    n = [(8, 44), (34, 14), (36, 68), (62, 41), (92, 12), (94, 68), (114, 40)]
+    edges = [(0, 1), (0, 2), (1, 3), (2, 3), (1, 4), (3, 4), (3, 5), (2, 5), (4, 6), (5, 6), (3, 6)]
+    bad, dur, kt = 4, "9s", "0;.38;.5;.86;1"
+    out = []
+    for a, b in edges:
+        (x1, y1), (x2, y2) = n[a], n[b]
+        anim = (f'<animate attributeName="stroke-opacity" values=".5;.5;.07;.07;.5" keyTimes="{kt}" dur="{dur}" '
+                f'repeatCount="indefinite"/>') if bad in (a, b) else ""
+        out.append(f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" stroke="{t["accent"]}" stroke-width=".8" '
+                   f'stroke-opacity=".5">{anim}</line>')
+    for path, begin in (("M8 44 L34 14 L62 41 L94 68 L114 40", "0s"), ("M8 44 L36 68 L62 41 L114 40", "1.7s"),
+                        ("M114 40 L94 68 L36 68 L8 44", "3.1s")):
+        out.append(f'<circle r="1.9" fill="{t["mint"]}" opacity="0">'
+                   f'<animateMotion path="{path}" dur="3.2s" begin="{begin}" repeatCount="indefinite"/>'
+                   f'<animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.1;.85;1" dur="3.2s" begin="{begin}" '
+                   f'repeatCount="indefinite"/></circle>')
+    for i, (x, y) in enumerate(n):
+        if i == bad:
+            out.append(f'<circle cx="{x}" cy="{y}" r="7.5" fill="none" stroke="{t["blush"]}" stroke-width=".8" '
+                       f'stroke-dasharray="2 2.2" opacity="0"><animate attributeName="opacity" values="0;0;.9;.9;0" '
+                       f'keyTimes="{kt}" dur="{dur}" repeatCount="indefinite"/></circle>')
+            out.append(f'<circle cx="{x}" cy="{y}" r="3.4" fill="{t["soft"]}"><animate attributeName="fill" '
+                       f'values="{t["soft"]};{t["blush"]};{t["blush"]};{t["blush"]};{t["soft"]}" keyTimes="0;.3;.5;.86;1" '
+                       f'dur="{dur}" repeatCount="indefinite"/></circle>')
+        else:
+            out.append(f'<circle cx="{x}" cy="{y}" r="3.4" fill="{t["soft"]}"/>')
+    return "".join(out)
+
+
+def motif_sentinel(t: dict) -> str:
+    """A breathing order book: bids in mint, asks in blush, the mid price dashed."""
+    out, base, x = [], 72, 2
+    rng = random.Random(7)
+    for h in [50, 43, 35, 28, 20, 12]:
+        out.append(_bar(x, base, 6.5, h, t["mint"], rng))
+        x += 9.5
+    mid = x + 3
+    out.append(f'<line x1="{fmt(mid)}" y1="4" x2="{fmt(mid)}" y2="{base}" stroke="{t["accent"]}" stroke-width=".8" '
+               f'stroke-dasharray="1.6 2.4" opacity=".9"/>')
+    x += 6
+    for h in [13, 21, 29, 36, 44, 52]:
+        out.append(_bar(x, base, 6.5, h, t["blush"], rng))
+        x += 9.5
+    out.append(f'<line x1="0" y1="{base + .5}" x2="{fmt(x)}" y2="{base + .5}" stroke="{t["muted"]}" stroke-width=".6" opacity=".6"/>')
+    return "".join(out)
+
+
+def _bar(x, base, w, h, color, rng) -> str:
+    dur = rng.uniform(2.8, 5.2)
+    variant = rng.choice("abc")
+    return (f'<rect class="fb" x="{fmt(x)}" y="{fmt(base - h)}" width="{fmt(w)}" height="{fmt(h)}" rx="1" fill="{color}" '
+            f'fill-opacity=".8" style="transform-origin:50% 100%;animation:depth-{variant} {dur:.2f}s ease-in-out '
+            f'{rng.uniform(0, 2):.2f}s infinite alternate"/>')
+
+
+PROJECTS = [
+    dict(key="crci", no="Nº 01 — DISTRIBUTED SYSTEMS", title="CRCI", tag="PREPRINT", motif=motif_crci,
+         sub="Byzantine-fault-tolerant gossip for mesh networks: every node isolates misbehaving peers on its own, "
+             "with no servers and no consensus.",
+         stats=[("< 1 ms", "REPLAY ISOLATION"), ("0 / 50", "HONEST PEERS BANNED"), ("O(n)", "COST PER MESSAGE")],
+         tools="RUST  ·  ED25519  ·  TLA+  ·  PROPTEST"),
+    dict(key="sentinel", no="Nº 02 — MARKET MICROSTRUCTURE", title="SENTINEL", tag=None, motif=motif_sentinel,
+         sub="Trust and toxicity detection for limit-order-book market-making: under extreme toxicity, the "
+             "trust-aware maker cuts its adverse-selection cost.",
+         stats=[("+10,843.99", "TICKS SAVED"), ("t = 3.50", "WELCH, N = 500"), ("p = 4.9e-4", "TWO-SIDED")],
+         tools="RUST  ·  HAWKES PROCESSES  ·  AVELLANEDA–STOIKOV"),
+]
+
+
+def card(t: dict, theme: str, p: dict, index: int) -> None:
+    d = Doc(CW, CH, f"{p['title']} — {p['sub']}")
+    delay = .15 + index * .12
+    d.css.append(f"""
+.cd {{ animation: rise 1.3s {EASE_OUT} {delay:.2f}s both; }}
+.ac {{ transform-box: fill-box; transform-origin: 0 50%; animation: drawx 1.4s {EASE_OUT} {delay + .5:.2f}s both; }}
+.ar {{ animation: nudge 6s ease-in-out {3 + index * .7:.1f}s infinite; }}
+@keyframes nudge {{ 0%, 86%, 100% {{ transform: none }} 92% {{ transform: translateX(3px) }} }}
+@keyframes depth-a {{ from {{ transform: scaleY(1) }} to {{ transform: scaleY(.74) }} }}
+@keyframes depth-b {{ from {{ transform: scaleY(1) }} to {{ transform: scaleY(.82) }} }}
+@keyframes depth-c {{ from {{ transform: scaleY(.9) }} to {{ transform: scaleY(1) }} }}
+""")
+    x0, L, R = 8, 32, CW - 32
+    d.add('<g class="cd">',
+          # 4px above the card (aligns with other blocks), 8px on the sides (gap between the two cards)
+          f'<rect x="{x0}" y="4" width="{CW - 16}" height="{CH - 16}" rx="14" fill="{t["surface"]}" stroke="{t["border"]}"/>',
+          f'<line class="ac" x1="{L}" y1="4.5" x2="{L + 56}" y2="4.5" stroke="{t["accent"]}" stroke-width="1.4"/>',
+          d.text(L, 40, p["no"], "sans-m", 9.5, t["accent"], tracking=2.4),
+          d.text(L, 88, p["title"], "serif-b", 38, t["ink"]))
+    if p["tag"]:
+        tx = L + measure("serif-b", p["title"], 38) + 14
+        tw = measure("sans-sb", p["tag"], 8, 1.8) + 16
+        d.add(f'<rect x="{fmt(tx)}" y="68" width="{fmt(tw)}" height="17" rx="8.5" fill="none" stroke="{t["accent"]}" '
+              f'stroke-opacity=".7" stroke-width=".8"/>',
+              d.text(tx + 8, 79.6, p["tag"], "sans-sb", 8, t["accent"], tracking=1.8))
+    d.add(f'<g transform="translate({R - 118},24)">{p["motif"](t)}</g>')
+    for i, line in enumerate(wrap("serif-i", p["sub"], 16.5, R - L)):
+        d.add(d.text(L, 120 + i * 21, line, "serif-i", 16.5, t["soft"]))
+    d.add(f'<line x1="{L}" y1="182" x2="{R}" y2="182" stroke="{t["rule"]}" stroke-width=".8"/>')
+    col = (R - L) / 3
+    for i, (value, label) in enumerate(p["stats"]):
+        x = L + i * col
+        size = 25.0
+        while measure("serif-b", value, size) > col - 12:
+            size -= .5
+        tracking = 1.5
+        while measure("sans-m", label, 8.5, tracking) > col - 10 and tracking > .4:
+            tracking -= .1
+        d.add(d.text(x, 216, value, "serif-b", size, t["ink"]),
+              d.text(x, 236, label, "sans-m", 8.5, t["muted"], tracking=tracking))
+    d.add(diamond(L + 2.4, 260.5, 2.2, fill=t["accent"]),
+          d.text(L + 12, 264, p["tools"], "sans-m", 8.5, t["muted"], tracking=1.4),
+          f'<g class="ar">{arrow(R - 16, 261, 16, t["accent"], 1.1)}</g>',
+          "</g>")
+    d.save(f"card-{p['key']}-{theme}.svg")
 
 
 # ==========================================================================
@@ -299,6 +471,8 @@ def main() -> None:
         for s in SECTIONS:
             section(t, theme, *s)
         instruments(t, theme)
+        for i, p in enumerate(PROJECTS):
+            card(t, theme, p, i)
         footer(t, theme)
 
 
