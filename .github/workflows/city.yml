@@ -1,8 +1,12 @@
 name: Rebuild contribution city
 
+# Rebuilds the contribution city every hour and on every change to the
+# scripts. The SVGs are force-pushed to the `output` branch (a single commit),
+# so main's history stays clean; the README loads them from there.
+
 on:
   schedule:
-    - cron: "23 19 * * *" # 00:53 IST, every night
+    - cron: "7 * * * *"
   workflow_dispatch:
   push:
     branches: [main]
@@ -33,16 +37,16 @@ jobs:
       - name: Render city from contribution data
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python scripts/city.py --login "${{ github.repository_owner }}"
+        run: python scripts/city.py --login "${{ github.repository_owner }}" --out dist
 
-      - name: Commit if changed
+      - name: Publish to the output branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          cd dist
+          git init -q -b output
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add assets/city-dark.svg assets/city-light.svg
-          if git diff --cached --quiet; then
-            echo "City unchanged."
-          else
-            git commit -m "Rebuild contribution city"
-            git push
-          fi
+          git add city-dark.svg city-light.svg
+          git commit -q -m "Rebuild contribution city"
+          git push -q -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" output

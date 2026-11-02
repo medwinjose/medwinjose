@@ -4,8 +4,8 @@
     python scripts/city.py --demo                      # synthetic placeholder
 
 Each day is a city block; the taller the building, the more was committed that day.
-Writes assets/city-dark.svg and assets/city-light.svg. Runs nightly via
-.github/workflows/city.yml.
+Writes assets/city-dark.svg and assets/city-light.svg. Runs hourly via
+.github/workflows/city.yml and is published to the `output` branch.
 """
 
 from __future__ import annotations
@@ -117,8 +117,8 @@ def poly(points, fill, extra="") -> str:
 
 PALETTE = {
     # tiers 1..4 (top-face colours); sides are derived by shading
-    "dark": ["#4F6358", "#6F8B7C", "#9DB5A6", "#CDAE74"],
-    "light": ["#D3DDD5", "#AFC4B6", "#86A394", "#C4A363"],
+    "dark": ["#4D4A7E", "#7C78D8", "#ADA6FF", "#FFB4C8"],
+    "light": ["#DEDBF8", "#BBB5F3", "#8F86E8", "#EE8CAC"],
 }
 
 
@@ -170,17 +170,17 @@ def render(days: list[tuple[dt.date, int]], theme: str, live: bool) -> Doc:
     # Moon (dark) or a faint sun (light), top-left above the oldest weeks.
     mx, my = 74, 64
     if theme == "dark":
-        doc.defs.append(f'<radialGradient id="glow"><stop offset="0" stop-color="{t["gold_hi"]}" stop-opacity=".35"/>'
-                        f'<stop offset="1" stop-color="{t["gold_hi"]}" stop-opacity="0"/></radialGradient>'
+        doc.defs.append(f'<radialGradient id="glow"><stop offset="0" stop-color="{t["butter"]}" stop-opacity=".35"/>'
+                        f'<stop offset="1" stop-color="{t["butter"]}" stop-opacity="0"/></radialGradient>'
                         f'<mask id="cres"><rect width="{W}" height="{H}" fill="#fff"/>'
                         f'<circle cx="{mx + 7}" cy="{my - 5}" r="12.5" fill="#000"/></mask>')
         doc.add(f'<circle class="halo" cx="{mx}" cy="{my}" r="38" fill="url(#glow)"/>',
-                f'<circle class="moon" cx="{mx}" cy="{my}" r="13" fill="{t["gold_hi"]}" mask="url(#cres)" opacity=".9"/>')
+                f'<circle class="moon" cx="{mx}" cy="{my}" r="13" fill="{t["butter"]}" mask="url(#cres)" opacity=".9"/>')
     else:
-        doc.defs.append(f'<radialGradient id="glow"><stop offset="0" stop-color="{t["gold_hi"]}" stop-opacity=".55"/>'
-                        f'<stop offset="1" stop-color="{t["gold_hi"]}" stop-opacity="0"/></radialGradient>')
+        doc.defs.append(f'<radialGradient id="glow"><stop offset="0" stop-color="{t["butter"]}" stop-opacity=".55"/>'
+                        f'<stop offset="1" stop-color="{t["butter"]}" stop-opacity="0"/></radialGradient>')
         doc.add(f'<circle class="halo" cx="{mx}" cy="{my}" r="40" fill="url(#glow)"/>',
-                f'<circle class="moon" cx="{mx}" cy="{my}" r="12" fill="{t["gold_hi"]}" opacity=".85"/>')
+                f'<circle class="moon" cx="{mx}" cy="{my}" r="12" fill="{t["butter"]}" opacity=".5"/>')
 
     # Ground: every day is a block, drawn once as a faint tile.
     ground = []
@@ -242,11 +242,11 @@ def render(days: list[tuple[dt.date, int]], theme: str, live: bool) -> Doc:
         for i, (k, v) in enumerate(ledger):
             y = 122 + i * 22
             doc.add(doc.text(rx - 112, y, k, "sans-m", 8, t["muted"], anchor="end", tracking=1.8),
-                    diamond(rx - 100, y - 3, 1.6, fill=t["gold"]),
+                    diamond(rx - 100, y - 3, 1.6, fill=t["blush"]),
                     doc.text(rx, y, v, "serif", 15.5, t["ink"], anchor="end"))
     else:
         doc.add(doc.text(rx, 70, "One building for every day.", "serif-i", 19, t["soft"], anchor="end"),
-                doc.text(rx, 94, "REBUILT NIGHTLY FROM THE CONTRIBUTION GRAPH", "sans-m", 8, t["muted"], anchor="end",
+                doc.text(rx, 94, "REBUILT HOURLY FROM THE CONTRIBUTION GRAPH", "sans-m", 8, t["muted"], anchor="end",
                          tracking=1.8))
     doc.add("</g>")
 
@@ -266,6 +266,7 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--login", default=os.environ.get("GITHUB_REPOSITORY_OWNER", "medwinjose"))
     ap.add_argument("--demo", action="store_true")
+    ap.add_argument("--out", default=None, help="output directory (default: assets/)")
     args = ap.parse_args()
 
     live = not args.demo
@@ -282,7 +283,13 @@ def main() -> int:
             days = fetch_html(args.login)
     days = sorted(days)[-371:]
     for theme in THEMES:
-        render(days, theme, live).save(f"city-{theme}.svg")
+        doc = render(days, theme, live)
+        if args.out:
+            os.makedirs(args.out, exist_ok=True)
+            with open(os.path.join(args.out, f"city-{theme}.svg"), "w", encoding="utf-8") as fh:
+                fh.write(doc.render())
+        else:
+            doc.save(f"city-{theme}.svg")
     print(f"rendered {len(days)} days, {sum(c for _, c in days)} contributions")
     return 0
 

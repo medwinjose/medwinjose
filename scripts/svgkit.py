@@ -21,37 +21,40 @@ FONT_DIR = ROOT / "assets" / "fonts"
 OUT_DIR = ROOT / "assets"
 
 # --------------------------------------------------------------------------
-# Palette: ivory, champagne and sage on GitHub dark; ink, bronze and sage on
-# GitHub light. Backgrounds stay transparent so every piece sits on the page.
+# Palette: soft but bright pastels (lavender, mint, blush, butter) on
+# GitHub dark; deeper versions of the same hues on GitHub light. Backgrounds
+# stay transparent so every piece sits directly on the page.
 # --------------------------------------------------------------------------
 THEMES = {
     "dark": {
-        "ink": "#ECE5D8",
-        "soft": "#BDB5A6",
-        "muted": "#8A8478",
-        "faint": "#5C5850",
-        "rule": "#34383F",
-        "gold": "#CDAE74",
-        "gold_hi": "#F3E2B8",
-        "sage": "#9DB5A6",
-        "rose": "#CF9C8E",
-        "surface": "#12171E",
-        "border": "#262B33",
-        "window": "#F4DDA6",
+        "ink": "#F4F1FB",
+        "soft": "#CBC6DC",
+        "muted": "#9893AD",
+        "faint": "#615C74",
+        "rule": "#2F2C3D",
+        "accent": "#B7AAFF",     # lavender
+        "accent_hi": "#E6E0FF",
+        "mint": "#93E6CC",
+        "blush": "#FFB4C8",
+        "butter": "#FFE29A",
+        "surface": "#15141D",
+        "border": "#2B2938",
+        "window": "#FFE8AE",
     },
     "light": {
-        "ink": "#23201B",
-        "soft": "#4E483F",
-        "muted": "#857E72",
-        "faint": "#B4AC9E",
-        "rule": "#E3DCCF",
-        "gold": "#9E7C3C",
-        "gold_hi": "#E9D3A0",
-        "sage": "#5F7E6E",
-        "rose": "#A86A5B",
-        "surface": "#FBF9F5",
-        "border": "#E8E1D4",
-        "window": "#FFFDF6",
+        "ink": "#1E1A2D",
+        "soft": "#4A4561",
+        "muted": "#7D7795",
+        "faint": "#B7B1C9",
+        "rule": "#E7E3F1",
+        "accent": "#6D5BDB",
+        "accent_hi": "#D9D1FF",
+        "mint": "#2E9C7E",
+        "blush": "#D8698C",
+        "butter": "#D9A23A",
+        "surface": "#FBFAFF",
+        "border": "#EAE6F5",
+        "window": "#FFFDF4",
     },
 }
 
