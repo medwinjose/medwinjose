@@ -23,6 +23,7 @@ TAGLINES = [  # none repeat the About text word for word
     "Quietly obsessed with correctness, latency and good typography.",
     "Every claim backed by a benchmark you can rerun.",
     "Happiest when the proof and the benchmark agree.",
+    "Curious by nature: I love research, wherever the question leads.",
 ]
 
 
@@ -269,10 +270,10 @@ def about(t: dict, theme: str) -> None:
     size, lead, gap = 15, 25, 15
     tx, tw = 246, W - 246 - 14          # text column
     blocks = [rich_lines(p, size, tw) for p in ABOUT]
-    n_lines = sum(len(b) for b in blocks) + 1
+    n_lines = sum(len(b) for b in blocks) + 2  # + research label and its line
     text_h = n_lines * lead + gap * len(blocks)
     top = 1                             # first cap-height lands 4px down, like every other block
-    H = int(top + text_h + 7)           # bottom padding matched to the Instruments block (measured)
+    H = int(top + text_h + 4)           # bottom padding matched to the Instruments block (measured)
 
     d = Doc(W, H, "About Medwin Jose: " + " ".join("".join(s for s, _ in p) for p in ABOUT))
     d.css.append(f".ab {{ animation: rise 1.2s {EASE_OUT} both; }}")
@@ -295,17 +296,23 @@ def about(t: dict, theme: str) -> None:
             y += lead
             k += 1
         y += gap
-    # Research interests: label, then the fields separated by small diamonds.
-    label = "Research interests"
+    # Research interests: a small-caps label, then the fields on one line with
+    # twinkling diamonds between them, ending open.
+    d.css.append(".tw { transform-box: fill-box; transform-origin: center; animation: tw 7s ease-in-out infinite; }\n"
+                 "@keyframes tw { 0%, 80%, 100% { transform: none; opacity: 1 } 88% { transform: scale(1.8) rotate(45deg); opacity: .5 } }")
     d.add(f'<g class="ab" style="animation-delay:{.1 + k * .06:.2f}s">',
-          d.text(tx, y, label, "sans-sb", size, t["ink"]))
-    x = tx + measure("sans-sb", label, size) + 14
-    for item in INTERESTS:
-        d.add(diamond(x, y - 4.6, 2.2, fill=t["accent"]))
-        x += 12
+          d.text(tx, y - 4, "RESEARCH INTERESTS", "sans-sb", 8.5, t["accent"], tracking=2.4))
+    y += lead - 6
+    x = tx
+    for i, item in enumerate(INTERESTS):
+        if i:
+            d.add(f'<g class="tw" style="animation-delay:{2 + i * 1.2:.1f}s">{diamond(x + 7, y - 4.6, 2.2, fill=t["accent"])}</g>')
+            x += 14 + 6
         d.add(d.text(x, y, item, "sans", size, t["soft"]))
-        x += measure("sans", item, size) + 14
-    d.add("</g>")
+        x += measure("sans", item, size) + 6
+    d.add(f'<g class="tw" style="animation-delay:{2 + len(INTERESTS) * 1.2:.1f}s">{diamond(x + 7, y - 4.6, 2.2, fill=t["accent"])}</g>')
+    x += 20
+    d.add(d.text(x, y + .5, "always open to new ones", "serif-i", size + 2.5, t["soft"]), "</g>")
     d.save(f"about-{theme}.svg")
 
 
@@ -331,9 +338,18 @@ def section(t: dict, theme: str, key: str, num: str, title: str, sub: str, extra
 .st {{ animation: rise 1.4s {EASE_OUT} .1s both; }}
 .rl {{ transform-box: fill-box; transform-origin: 100% 50%; animation: drawx 1.5s {EASE_OUT} .45s both; }}
 .rr {{ transform-box: fill-box; transform-origin: 0 50%; animation: drawx 1.5s {EASE_OUT} .45s both; }}
-.ed {{ animation: fade 1s ease-out 1.6s both; }}
+.ed {{ animation: fade 1s ease-out 1.6s both, breathe 5s ease-in-out 2.6s infinite; }}
 .sb {{ animation: fade 1.4s ease-out .7s both; }}
 """)
+    # A faint light travels outward along both rules every 10 seconds.
+    for gid, x1, x2, vals in (("gl", 0, -80, "0 0;-700 0;-700 0"), ("gr", W, W + 80, "0 0;700 0;700 0")):
+        d.defs.append(f'<linearGradient id="{gid}" gradientUnits="userSpaceOnUse" x1="{W / 2 + (x1 - W / 2) * 0}" y1="0" '
+                      f'x2="{W / 2 + (x2 - x1)}" y2="0">'
+                      f'<stop offset="0" stop-color="{t["accent_hi"]}" stop-opacity="0"/>'
+                      f'<stop offset=".5" stop-color="{t["accent_hi"]}" stop-opacity=".9"/>'
+                      f'<stop offset="1" stop-color="{t["accent_hi"]}" stop-opacity="0"/>'
+                      f'<animateTransform attributeName="gradientTransform" type="translate" values="{vals}" '
+                      f'keyTimes="0;.3;1" dur="10s" begin="2.5s" repeatCount="indefinite"/></linearGradient>')
     ns, ts, gap = 28, 33, 11
     wn, wt = measure("serif-bi", num, ns), measure("serif", title, ts)
     x = W / 2 - (wn + gap + wt) / 2
@@ -345,6 +361,8 @@ def section(t: dict, theme: str, key: str, num: str, title: str, sub: str, extra
           "</g>",
           f'<line class="rl" x1="84" y1="{mid}" x2="{fmt(left_end)}" y2="{mid}" stroke="{t["accent"]}" stroke-width=".8" opacity=".6"/>',
           f'<line class="rr" x1="{fmt(right_start)}" y1="{mid}" x2="{W - 84}" y2="{mid}" stroke="{t["accent"]}" stroke-width=".8" opacity=".6"/>',
+          f'<line x1="84" y1="{mid}" x2="{fmt(left_end)}" y2="{mid}" stroke="url(#gl)" stroke-width=".9"/>',
+          f'<line x1="{fmt(right_start)}" y1="{mid}" x2="{W - 84}" y2="{mid}" stroke="url(#gr)" stroke-width=".9"/>',
           f'<g class="ed">{diamond(78, mid, 2.6, fill=t["accent"])}{diamond(W - 78, mid, 2.6, fill=t["accent"])}</g>',
           '<g class="sb">', d.text(W / 2, top + 50, sub, "sans-m", 9, t["muted"], anchor="middle", tracking=3.4), "</g>")
     d.save(f"section-{key}-{theme}.svg")
@@ -353,7 +371,7 @@ def section(t: dict, theme: str, key: str, num: str, title: str, sub: str, extra
 # ==========================================================================
 # Selected work: two cards, each with a small animated motif
 # ==========================================================================
-CW, CH = 420, 164
+CW, CH = 420, 155
 
 
 def motif_crci(t: dict) -> str:
@@ -388,29 +406,47 @@ def motif_crci(t: dict) -> str:
 
 
 def motif_sentinel(t: dict) -> str:
-    """A breathing order book: bids in mint, asks in blush, the mid price dashed."""
+    """A living order book: depth breathes, the mid price drifts, and every few
+    seconds a spoof order appears on the ask side, is flagged, then cancelled."""
     out, base, x = [], 72, 2
     rng = random.Random(7)
     for h in [50, 43, 35, 28, 20, 12]:
         out.append(_bar(x, base, 6.5, h, t["mint"], rng))
         x += 9.5
     mid = x + 3
-    out.append(f'<line x1="{fmt(mid)}" y1="4" x2="{fmt(mid)}" y2="{base}" stroke="{t["accent"]}" stroke-width=".8" '
-               f'stroke-dasharray="1.6 2.4" opacity=".9"/>')
+    out.append(f'<line x1="{fmt(mid)}" y1="4" x2="{fmt(mid)}" y2="{base}" stroke="{t["accent"]}" stroke-width=".9" '
+               f'stroke-dasharray="1.6 2.4" opacity=".9"><animate attributeName="stroke-dashoffset" values="0;-8" '
+               f'dur="1.6s" repeatCount="indefinite"/></line>')
     x += 6
+    ask0 = x
     for h in [13, 21, 29, 36, 44, 52]:
         out.append(_bar(x, base, 6.5, h, t["blush"], rng))
         x += 9.5
+    # The spoof: a tall order stacked on the second ask level, flagged, then pulled.
+    sx, sh, dur, kt = ask0 + 9.5, 46, "6s", "0;.18;.26;.62;.72;1"
+    out.append(f'<rect x="{fmt(sx)}" y="{base - 21 - sh}" width="6.5" height="{sh}" rx="1" fill="{t["blush"]}" opacity="0">'
+               f'<animate attributeName="opacity" values="0;0;.55;.55;0;0" keyTimes="{kt}" dur="{dur}" repeatCount="indefinite"/></rect>')
+    out.append(f'<rect x="{fmt(sx - 3)}" y="{base - 21 - sh - 3}" width="12.5" height="{sh + 6}" rx="2.5" fill="none" '
+               f'stroke="{t["accent"]}" stroke-width=".8" stroke-dasharray="2 2" opacity="0">'
+               f'<animate attributeName="opacity" values="0;0;0;.95;0;0" keyTimes="0;.18;.34;.44;.62;1" dur="{dur}" '
+               f'repeatCount="indefinite"/></rect>')
     out.append(f'<line x1="0" y1="{base + .5}" x2="{fmt(x)}" y2="{base + .5}" stroke="{t["muted"]}" stroke-width=".6" opacity=".6"/>')
     return "".join(out)
 
 
 def _bar(x, base, w, h, color, rng) -> str:
-    dur = rng.uniform(2.8, 5.2)
-    variant = rng.choice("abc")
-    return (f'<rect class="fb" x="{fmt(x)}" y="{fmt(base - h)}" width="{fmt(w)}" height="{fmt(h)}" rx="1" fill="{color}" '
-            f'fill-opacity=".8" style="transform-origin:50% 100%;animation:depth-{variant} {dur:.2f}s ease-in-out '
-            f'{rng.uniform(0, 2):.2f}s infinite alternate"/>')
+    """One depth bar that breathes from its base (SMIL, so it animates everywhere)."""
+    dur = rng.uniform(2.6, 4.4)
+    lo = h * rng.uniform(.62, .78)
+    begin = rng.uniform(0, 2)
+    vals_h = f"{h:.1f};{lo:.1f};{h:.1f}"
+    vals_y = f"{base - h:.1f};{base - lo:.1f};{base - h:.1f}"
+    anim = (f'<animate attributeName="height" values="{vals_h}" dur="{dur:.2f}s" begin="{begin:.2f}s" repeatCount="indefinite" '
+            f'calcMode="spline" keySplines=".45 0 .55 1;.45 0 .55 1"/>'
+            f'<animate attributeName="y" values="{vals_y}" dur="{dur:.2f}s" begin="{begin:.2f}s" repeatCount="indefinite" '
+            f'calcMode="spline" keySplines=".45 0 .55 1;.45 0 .55 1"/>')
+    return (f'<rect x="{fmt(x)}" y="{fmt(base - h)}" width="{fmt(w)}" height="{fmt(h)}" rx="1" fill="{color}" '
+            f'fill-opacity=".8">{anim}</rect>')
 
 
 PROJECTS = [  # a hook only; the repositories hold the detail
@@ -424,6 +460,7 @@ PROJECTS = [  # a hook only; the repositories hold the detail
 
 
 def card(t: dict, theme: str, p: dict, index: int) -> None:
+    """A compact card on a strict 26px inner margin; type scaled down so it breathes."""
     d = Doc(CW, CH, f"{p['title']}: {p['hook']} {p['figure'][0]} {p['figure'][1].lower()}")
     delay = .15 + index * .12
     d.css.append(f"""
@@ -431,30 +468,40 @@ def card(t: dict, theme: str, p: dict, index: int) -> None:
 .ac {{ transform-box: fill-box; transform-origin: 0 50%; animation: drawx 1.4s {EASE_OUT} {delay + .5:.2f}s both; }}
 .ar {{ animation: nudge 6s ease-in-out {3 + index * .7:.1f}s infinite; }}
 @keyframes nudge {{ 0%, 86%, 100% {{ transform: none }} 92% {{ transform: translateX(3px) }} }}
-@keyframes depth-a {{ from {{ transform: scaleY(1) }} to {{ transform: scaleY(.74) }} }}
-@keyframes depth-b {{ from {{ transform: scaleY(1) }} to {{ transform: scaleY(.82) }} }}
-@keyframes depth-c {{ from {{ transform: scaleY(.9) }} to {{ transform: scaleY(1) }} }}
 """)
-    x0, L, R = 8, 34, CW - 34
-    top = 4  # 4px above and below: the cards sit in a link paragraph, which adds its own margin
+    # A soft light that glides along the card's top accent every few seconds.
+    d.defs.append(f'<linearGradient id="glint" gradientUnits="userSpaceOnUse" x1="-60" y1="0" x2="0" y2="0">'
+                  f'<stop offset="0" stop-color="{t["accent_hi"]}" stop-opacity="0"/>'
+                  f'<stop offset=".5" stop-color="{t["accent_hi"]}" stop-opacity=".9"/>'
+                  f'<stop offset="1" stop-color="{t["accent_hi"]}" stop-opacity="0"/>'
+                  f'<animateTransform attributeName="gradientTransform" type="translate" values="0 0;160 0;160 0" '
+                  f'keyTimes="0;.25;1" dur="8s" begin="{3 + index * 1.5:.1f}s" repeatCount="indefinite"/></linearGradient>')
+    top, pad = 4, 26
+    x0, L, R = 8, 8 + pad, CW - 8 - pad
     value, label = p["figure"]
+    kicker_base = top + pad + 6          # cap-height of 8.5px Inter sits on the inner margin
+    title_base = kicker_base + 29
+    hook_base = title_base + 25
+    fig_base = hook_base + 31
+    rect_h = fig_base + 4 + pad - top    # same 26px margin below the figure's descenders
     d.add('<g class="cd">',
-          f'<rect x="{x0}" y="{top}" width="{CW - 16}" height="{CH - 8}" rx="14" fill="{t["surface"]}" stroke="{t["border"]}"/>',
-          f'<line class="ac" x1="{L}" y1="{top + .5}" x2="{L + 48}" y2="{top + .5}" stroke="{t["accent"]}" stroke-width="1.4"/>',
-          d.text(L, top + 30, p["kicker"], "sans-m", 9, t["accent"], tracking=2.4),
-          d.text(L, top + 68, p["title"], "serif-b", 32, t["ink"]))
-    # Motif: top-right, spanning the kicker and title.
-    d.add(f'<g transform="translate({R - 89},{top + 17}) scale(.75)">{p["motif"](t)}</g>')
-    size = 16.5
+          f'<rect x="{x0}" y="{top}" width="{CW - 16}" height="{rect_h}" rx="12" fill="{t["surface"]}" stroke="{t["border"]}"/>',
+          f'<line class="ac" x1="{L}" y1="{top + .5}" x2="{L + 40}" y2="{top + .5}" stroke="{t["accent"]}" stroke-width="1.2"/>',
+          f'<line x1="{L}" y1="{top + .5}" x2="{L + 40}" y2="{top + .5}" stroke="url(#glint)" stroke-width="1.2"/>',
+          d.text(L, kicker_base, p["kicker"], "sans-m", 8.5, t["accent"], tracking=2.3),
+          d.text(L, title_base, p["title"], "serif-b", 26, t["ink"]))
+    # Motif: right-aligned to the inner margin, top-aligned with the kicker's cap-height.
+    ms = .58
+    d.add(f'<g transform="translate({R - 118 * ms:.1f},{top + pad:.1f}) scale({ms})">{p["motif"](t)}</g>')
+    size = 15
     while measure("serif-i", p["hook"], size) > R - L:
         size -= .25
-    d.add(d.text(L, top + 96, p["hook"], "serif-i", size, t["soft"]))
-    # One figure, one label, on a shared baseline; arrow on the same line.
-    fy = top + 136
-    d.add(d.text(L, fy, value, "serif-b", 22, t["ink"]),
-          d.text(L + measure("serif-b", value, 22) + 10, fy, label, "sans-m", 8.5, t["muted"], tracking=1.5),
-          f'<g class="ar">{arrow(R - 16, fy - 4, 16, t["accent"], 1.1)}</g>',
+    d.add(d.text(L, hook_base, p["hook"], "serif-i", size, t["soft"]))
+    d.add(d.text(L, fig_base, value, "serif-b", 19, t["ink"]),
+          d.text(L + measure("serif-b", value, 19) + 9, fig_base, label, "sans-m", 8, t["muted"], tracking=1.4),
+          f'<g class="ar">{arrow(R - 14, fig_base - 4, 14, t["accent"], 1.1)}</g>',
           "</g>")
+    assert CH == top + rect_h + top, (CH, top + rect_h + top)
     d.save(f"card-{p['key']}-{theme}.svg")
 
 
@@ -476,6 +523,8 @@ def instruments(t: dict, theme: str) -> None:
     d.css.append(f"""
 .col {{ animation: rise 1.3s {EASE_OUT} both; }}
 .sep {{ transform-box: fill-box; transform-origin: 50% 0; animation: drawy 1.6s {EASE_OUT} .3s both; }}
+.ul  {{ transform-box: fill-box; transform-origin: center; animation: pulse 8s ease-in-out infinite; }}
+@keyframes pulse {{ 0%, 70%, 100% {{ transform: scaleX(1); opacity: 1 }} 80% {{ transform: scaleX(1.9); opacity: .55 }} }}
 """)
     cw = W / 4
     for i in range(1, 4):
@@ -485,7 +534,8 @@ def instruments(t: dict, theme: str) -> None:
         c = t[color]
         d.add(f'<g class="col" style="animation-delay:{.15 + i * .14:.2f}s">',
               d.text(cx, 16, head, "sans-sb", 9, c, anchor="middle", tracking=3),
-              f'<line x1="{cx - 11}" y1="29" x2="{cx + 11}" y2="29" stroke="{c}" stroke-width="1.2" stroke-linecap="round"/>')
+              f'<line class="ul" x1="{cx - 11}" y1="29" x2="{cx + 11}" y2="29" stroke="{c}" stroke-width="1.2" '
+              f'stroke-linecap="round" style="animation-delay:{3 + i * 2:.1f}s"/>')
         for k, item in enumerate(items):
             size = 18
             while measure("serif", item, size) > cw - 22:
