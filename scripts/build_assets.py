@@ -270,7 +270,11 @@ def rich_lines(runs: list, size: float, width: float) -> list:
 
 def about(t: dict, theme: str) -> None:
     size, lead, gap = 15, 25, 15
-    tx, tw = 246, W - 246 - 14          # text column
+    # Same outer edges as the section rules and Instruments: the knight's column
+    # starts at RULE_L, the justified text ends exactly at RULE_R.
+    knight_cx = RULE_L + 84
+    tx = RULE_L + 186
+    tw = RULE_R - tx
     blocks = [rich_lines(p, size, tw) for p in ABOUT]
     n_lines = sum(len(b) for b in blocks) + 2  # + research label and its line
     text_h = n_lines * lead + gap * len(blocks)
@@ -282,7 +286,7 @@ def about(t: dict, theme: str) -> None:
 
     # Knight, scaled to the text block and centred on it.
     s = min(.74, (text_h + 8) / 236)
-    kx, ky = 112 - 150 * s, top + text_h / 2 - 160 * s - 4
+    kx, ky = knight_cx - 150 * s, top + text_h / 2 - 160 * s - 4
     d.add(f'<g transform="translate({kx:.1f},{ky:.1f}) scale({s:.3f})">{knight_parts(d)}</g>')
 
     y = top + 15  # first baseline: cap-height of 15px Inter sits on the block's top edge
@@ -298,36 +302,43 @@ def about(t: dict, theme: str) -> None:
             spaces = [i for i, (_, _, sp) in enumerate(words) if sp and i]
             space_w = measure("sans", " ", size)
             last = li == len(block) - 1
-            extra = 0 if last or not spaces else (tw - natural - space_w * len(spaces)) / len(spaces)
+            slack = 0 if last or not spaces else tw - natural - space_w * len(spaces)
+            # Typesetter's justification: absorb up to a third of the slack in very
+            # slight letter-spacing (max 0.35px), the rest in the word gaps, so no
+            # line gets visibly gappy.
+            chars = sum(max(len(w) - 1, 0) for w, _, _ in words)
+            track = min(.35, slack / 3 / chars) if chars else 0
+            extra = (slack - track * chars) / len(spaces) if spaces and slack else 0
             x, spans = tx, []
             for i, (w, f, sp) in enumerate(words):
                 if i and sp:
                     x += space_w + extra
                 d.use_glyphs(f, w)
-                spans.append(f'<tspan x="{x:.2f}" class="f-{f}">{escape(w)}</tspan>')
-                x += measure(f, w, size)
+                ls = f' letter-spacing="{track:.3f}"' if track else ""
+                spans.append(f'<tspan x="{x:.2f}" class="f-{f}"{ls}>{escape(w)}</tspan>')
+                x += measure(f, w, size) + track * max(len(w) - 1, 0)
             d.add(f'<g class="ab" style="animation-delay:{.1 + k * .06:.2f}s">'
                   f'<text y="{y}" font-size="{size}" fill="{t["ink"]}">{"".join(spans)}</text></g>')
             y += lead
             k += 1
         y += gap
-    # Research interests: a small-caps label, then the fields spread across the
-    # full column width (matching the justified text) with twinkling diamonds.
-    d.css.append(".tw { transform-box: fill-box; transform-origin: center; animation: tw 7s ease-in-out infinite; }\n"
-                 "@keyframes tw { 0%, 80%, 100% { transform: none; opacity: 1 } 88% { transform: scale(1.8) rotate(45deg); opacity: .5 } }")
+    # Research interests: a small-caps label, then the fields at their natural
+    # spacing, separated by identical diamonds that twinkle by fading only.
+    d.css.append(".tw { animation: tw 6s ease-in-out infinite; }\n"
+                 "@keyframes tw { 0%, 75%, 100% { opacity: 1 } 87% { opacity: .25 } }")
     d.add(f'<g class="ab" style="animation-delay:{.1 + k * .06:.2f}s">',
           d.text(tx, y - 4, "RESEARCH INTERESTS", "sans-sb", 8.5, t["accent"], tracking=2.4))
     y += lead - 6
-    pieces = [(item, "sans", size, 0) for item in INTERESTS] + [("always open to new ones", "serif-i", size + 2.5, .5)]
-    widths = [measure(f, w, sz) for w, f, sz, _ in pieces]
-    sep = (tw - sum(widths)) / (len(pieces) - 1)   # equal space around each diamond
-    x = tx
-    for i, ((w, f, sz, dy), wd) in enumerate(zip(pieces, widths)):
+    pieces = [(item, "sans", size, 0) for item in INTERESTS] + [("open to new ones", "serif-i", size + 2.5, .5)]
+    x, sep = tx, 13
+    for i, (w, f, sz, dy) in enumerate(pieces):
         if i:
-            d.add(f'<g class="tw" style="animation-delay:{2 + i * 1.2:.1f}s">'
-                  f'{diamond(x - sep / 2, y - 4.6, 2.2, fill=t["accent"])}</g>')
+            d.add(f'<g class="tw" style="animation-delay:{1.5 + i * 1.5:.1f}s">'
+                  f'{diamond(x + sep, y - 4.6, 2.1, fill=t["accent"])}</g>')
+            x += 2 * sep
         d.add(d.text(x, y + dy, w, f, sz, t["soft"]))
-        x += wd + sep
+        x += measure(f, w, sz)
+    assert x <= tx + tw, "research line wider than the column"
     d.add("</g>")
     d.save(f"about-{theme}.svg")
 
@@ -387,7 +398,7 @@ def section(t: dict, theme: str, key: str, num: str, title: str, sub: str, extra
 # ==========================================================================
 # Selected work: two cards, each with a small animated motif
 # ==========================================================================
-CW, CH = 420, 138
+CW, CH = 420, 154
 
 
 def motif_crci(t: dict) -> str:
@@ -476,35 +487,27 @@ PROJECTS = [  # a hook only; the repositories hold the detail
 
 
 def card(t: dict, theme: str, p: dict, index: int) -> None:
-    """An editorial entry rather than a UI card: no box, no fill, no accent bar.
-    A hairline above and below, with the text flush to the rules' ends."""
+    """A compact card: a quiet filled panel, 30px inner margin, no accent bar or glint."""
     d = Doc(CW, CH, f"{p['title']}: {p['hook']} {p['figure'][0]} {p['figure'][1].lower()}")
     delay = .15 + index * .12
     d.css.append(f"""
 .cd {{ animation: rise 1.3s {EASE_OUT} {delay:.2f}s both; }}
-.hl {{ transform-box: fill-box; transform-origin: 0 50%; animation: drawx 1.6s {EASE_OUT} {delay:.2f}s both; }}
 .ar {{ animation: nudge 6s ease-in-out {3 + index * .7:.1f}s infinite; }}
 @keyframes nudge {{ 0%, 86%, 100% {{ transform: none }} 92% {{ transform: translateX(3px) }} }}
 """)
-    top, pad, inner = 4, 22, 14         # inner: half of the 28px gutter between the two entries
-    # The pair is shown at 49% width each (1% page margin either side). The outer
-    # edge is pulled in so the hairlines end exactly under the section rule's end
-    # diamonds (RULE_L / RULE_R), the same edges the Instruments columns use.
-    outer = round((RULE_L / W - .01) / .49 * CW)
-    L, R = (outer, CW - inner) if index == 0 else (inner, CW - outer)
+    top, pad, side = 4, 30, 14          # side: margin outside the card, so the pair has a 28px gutter
+    x0, L, R = side, side + pad, CW - side - pad
     value, label = p["figure"]
-    kicker_base = top + pad + 6          # cap-height of 8px Inter sits 22px below the top rule
+    kicker_base = top + pad + 6          # cap-height of 8px Inter sits on the inner margin
     title_base = kicker_base + 26
     hook_base = title_base + 22
     fig_base = hook_base + 28
-    bottom_rule = fig_base + 4 + pad     # the same 22px below the figure's descenders
-    d.add(f'<line class="hl" x1="{L}" y1="{top + .5}" x2="{R}" y2="{top + .5}" stroke="{t["rule"]}" stroke-width="1"/>',
-          f'<line class="hl" x1="{L}" y1="{bottom_rule + .5}" x2="{R}" y2="{bottom_rule + .5}" stroke="{t["rule"]}" '
-          f'stroke-width="1" style="animation-delay:{delay + .25:.2f}s"/>',
-          '<g class="cd">',
+    rect_h = fig_base + 4 + pad - top    # same 26px margin below the figure's descenders
+    d.add('<g class="cd">',
+          f'<rect x="{x0}" y="{top}" width="{CW - 2 * side}" height="{rect_h}" rx="12" fill="{t["surface"]}" stroke="{t["border"]}"/>',
           d.text(L, kicker_base, p["kicker"], "sans-m", 8, t["accent"], tracking=2.2),
           d.text(L, title_base, p["title"], "serif-b", 22, t["ink"]))
-    # Motif: right-aligned to the rule's end, top-aligned with the kicker's cap-height.
+    # Motif: right-aligned to the inner margin, top-aligned with the kicker's cap-height.
     ms = .46
     d.add(f'<g transform="translate({R - p["motif_w"] * ms:.2f},{top + pad:.1f}) scale({ms})">{p["motif"](t)}</g>')
     size = 13.5
@@ -513,9 +516,9 @@ def card(t: dict, theme: str, p: dict, index: int) -> None:
     d.add(d.text(L, hook_base, p["hook"], "serif-i", size, t["soft"]))
     d.add(d.text(L, fig_base, value, "serif-b", 16.5, t["ink"]),
           d.text(L + measure("serif-b", value, 16.5) + 8, fig_base, label, "sans-m", 7.5, t["muted"], tracking=1.3),
-          f'<g class="ar">{arrow(R - 12.55, fig_base - 3.5, 12, t["accent"], 1.1)}</g>',  # tip + round cap end on R
+          f'<g class="ar">{arrow(R - 12.55, fig_base - 3.5, 12, t["accent"], 1.1)}</g>',
           "</g>")
-    assert CH == bottom_rule + 1 + top - 1, (CH, bottom_rule + top)
+    assert CH == top + rect_h + top, (CH, top + rect_h + top)
     d.save(f"card-{p['key']}-{theme}.svg")
 
 
