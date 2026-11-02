@@ -5,7 +5,7 @@
 
 Each day is a city block; the taller the building, the more was committed that day.
 Writes assets/city-dark.svg and assets/city-light.svg. Runs hourly via
-.github/workflows/city.yml and is published to the `output` branch.
+.github/workflows/city.yml.
 """
 
 from __future__ import annotations
