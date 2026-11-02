@@ -1,11 +1,13 @@
 name: Rebuild contribution city
 
-# Rebuilds the contribution city every hour and on every change to the
-# scripts, committing assets/city-*.svg only when the picture changed.
+# Checks the contribution graph every 5 minutes (GitHub's shortest schedule)
+# and on every change to the scripts. assets/city-*.svg is committed only when
+# the picture actually changed, i.e. after new activity or when the day rolls
+# over. Bot commits are not counted as contributions, so this never loops.
 
 on:
   schedule:
-    - cron: "7 * * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch:
   push:
     branches: [main]

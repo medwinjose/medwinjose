@@ -25,29 +25,29 @@ TAGLINES = [
 
 
 def header(t: dict, theme: str) -> None:
-    d = Doc(W, 180, "Medwin Jose — building systems that stay correct when participants misbehave")
+    d = Doc(W, 170, "Medwin Jose — building systems that stay correct when participants misbehave")
     cx = W / 2
     n = len(TAGLINES)
     cycle = 4.5 * n
     d.css.append(f"""
-.k  {{ animation: fade 1.4s ease-out .1s both; }}
-.nm {{ animation: rise 1.8s {EASE_OUT} .25s both; }}
-.rl {{ transform-box: fill-box; transform-origin: 100% 50%; animation: drawx 1.6s {EASE_OUT} 1s both; }}
-.rr {{ transform-box: fill-box; transform-origin: 0 50%; animation: drawx 1.6s {EASE_OUT} 1s both; }}
-.dm {{ animation: fade 1s ease-out 1.5s both, breathe 5s ease-in-out 2.5s infinite; }}
+.k  {{ animation: fade 1s ease-out 0s both; }}
+.nm {{ animation: rise 1.4s {EASE_OUT} .1s both; }}
+.rl {{ transform-box: fill-box; transform-origin: 100% 50%; animation: drawx 1.2s {EASE_OUT} .35s both; }}
+.rr {{ transform-box: fill-box; transform-origin: 0 50%; animation: drawx 1.2s {EASE_OUT} .35s both; }}
+.dm {{ animation: fade .8s ease-out .6s both, breathe 5s ease-in-out 1.6s infinite; }}
 .tl {{ opacity: 0; animation: cycle {cycle}s ease-in-out infinite both; }}
 .t1 {{ opacity: 1; }}
 @keyframes cycle {{ 0% {{ opacity: 0; transform: translateY(5px) }} 5% {{ opacity: 1; transform: none }}
   29% {{ opacity: 1; transform: none }} 33.3% {{ opacity: 0; transform: translateY(-4px) }} 100% {{ opacity: 0 }} }}
 @media (prefers-reduced-motion: reduce) {{ .tl:not(.t1) {{ display: none }} }}
-.mt {{ animation: fade 1.6s ease-out 2.3s both; }}
+.mt {{ animation: fade 1.2s ease-out .9s both; }}
 """)
     kick = "HELLO, I AM"
     kw = measure("sans-m", kick, 9, 4.5)
     d.add('<g class="k">',
           d.text(cx, 12, kick, "sans-m", 9, t["accent"], anchor="middle", tracking=4.5),
-          diamond(cx - kw / 2 - 16, 9, 2.3, fill=t["blush"]),
-          diamond(cx + kw / 2 + 16, 9, 2.3, fill=t["mint"]),
+          diamond(cx - kw / 2 - 16, 9, 2.3, fill=t["accent"]),
+          diamond(cx + kw / 2 + 16, 9, 2.3, fill=t["accent"]),
           "</g>")
 
     # Name with a soft lavender-to-blush sheen drifting across it now and then.
@@ -59,24 +59,24 @@ def header(t: dict, theme: str) -> None:
         f'<stop offset=".65" stop-color="{t["blush"]}" stop-opacity=".9"/>'
         f'<stop offset="1" stop-color="{t["blush"]}" stop-opacity="0"/>'
         f'<animateTransform attributeName="gradientTransform" type="translate" values="0 0;1150 0;1150 0" '
-        f'keyTimes="0;.24;1" dur="11s" begin="2.6s" repeatCount="indefinite"/></linearGradient>'
+        f'keyTimes="0;.24;1" dur="11s" begin="1.6s" repeatCount="indefinite"/></linearGradient>'
     )
     d.add('<g class="nm">',
-          d.text(cx, 73, name, "serif", 56, t["ink"], anchor="middle", tracking=13.5),
-          d.text(cx, 73, name, "serif", 56, "url(#sheen)", anchor="middle", tracking=13.5),
+          d.text(cx, 66, name, "serif", 48, t["ink"], anchor="middle", tracking=11.5),
+          d.text(cx, 66, name, "serif", 48, "url(#sheen)", anchor="middle", tracking=11.5),
           "</g>")
 
-    y = 97
-    d.add(f'<line class="rl" x1="304" y1="{y}" x2="{cx - 12}" y2="{y}" stroke="{t["accent"]}" stroke-width=".9" opacity=".75"/>',
-          f'<line class="rr" x1="{cx + 12}" y1="{y}" x2="{W - 304}" y2="{y}" stroke="{t["accent"]}" stroke-width=".9" opacity=".75"/>',
+    y = 88
+    d.add(f'<line class="rl" x1="318" y1="{y}" x2="{cx - 12}" y2="{y}" stroke="{t["accent"]}" stroke-width=".9" opacity=".75"/>',
+          f'<line class="rr" x1="{cx + 12}" y1="{y}" x2="{W - 318}" y2="{y}" stroke="{t["accent"]}" stroke-width=".9" opacity=".75"/>',
           f'<g class="dm">{diamond(cx, y, 3.8, stroke=t["blush"], sw=1)}{diamond(cx, y, 1.5, fill=t["blush"])}</g>')
 
     for i, line in enumerate(TAGLINES):
-        d.add(f'<g class="tl t{i + 1}" style="animation-delay:{1.9 + i * cycle / n:.2f}s">',
-              d.text(cx, 132, line, "serif-i", 19.5, t["soft"], anchor="middle"), "</g>")
+        d.add(f'<g class="tl t{i + 1}" style="animation-delay:{.55 + i * cycle / n:.2f}s">',
+              d.text(cx, 122, line, "serif-i", 19.5, t["soft"], anchor="middle"), "</g>")
 
     d.add('<g class="mt">',
-          d.text(cx, 165, "SYSTEMS  ·  RESEARCH  ·  ENGINEERING", "sans-m", 8.5, t["muted"], anchor="middle", tracking=3.6),
+          d.text(cx, 155, "SYSTEMS  ·  RESEARCH  ·  ENGINEERING", "sans-m", 8.5, t["muted"], anchor="middle", tracking=3.6),
           "</g>")
     d.save(f"header-{theme}.svg")
 
@@ -93,7 +93,7 @@ def chip(t: dict, theme: str, key: str, label: str, index: int) -> None:
     tw = measure("sans-m", label, 9.5, 2.1)
     w, h = tw + 54, 34
     d = Doc(int(math.ceil(w)) + 4, h + 4, label.title())
-    delay = 2.4 + index * .14
+    delay = 1.1 + index * .1
     d.css.append(f"""
 .c {{ animation: rise 1.2s {EASE_OUT} {delay:.2f}s both; }}
 .ar {{ animation: nudge 7s ease-in-out {delay + 2 + index * .5:.2f}s infinite; }}
@@ -114,8 +114,8 @@ def chip(t: dict, theme: str, key: str, label: str, index: int) -> None:
 def knight() -> None:
     # Tall canvas with the figure vertically centred, so the floated image is
     # as tall as the About text beside it and the text never wraps underneath.
-    dy = 35
-    d = Doc(320, 370, "A small horned knight looking around curiously")
+    dy = 70
+    d = Doc(320, 440, "A small horned knight looking around curiously")
     mask, eye, cloak, rim, line = "#F8F6FF", "#0F0E17", "#363859", "#A79BF5", "#2B2944"
     lav, blush, mint = "#B7AAFF", "#FFB4C8", "#93E6CC"
     d.css.append("""
@@ -123,7 +123,7 @@ def knight() -> None:
 @keyframes bob { from { transform: translateY(0) } to { transform: translateY(-5px) } }
 .shadow { transform-box: fill-box; transform-origin: center; animation: shrink 2.8s ease-in-out infinite alternate; }
 @keyframes shrink { from { transform: scaleX(1); opacity: .5 } to { transform: scaleX(.86); opacity: .32 } }
-.head  { transform-box: view-box; transform-origin: 150px 217px; animation: look 11s ease-in-out infinite; }
+.head  { transform-box: view-box; transform-origin: 150px 252px; animation: look 11s ease-in-out infinite; }
 @keyframes look {
   0%, 10%   { transform: none }
   15%, 30%  { transform: translateX(-5px) rotate(-3deg) }
@@ -139,7 +139,7 @@ def knight() -> None:
   82%, 100% { transform: none } }
 .blink { transform-box: fill-box; transform-origin: center; animation: blink 4.6s ease-in-out infinite; }
 @keyframes blink { 0%, 44%, 52%, 100% { transform: none } 48% { transform: scaleY(.08) } }
-.cloak { transform-box: view-box; transform-origin: 150px 211px; animation: sway 2.8s ease-in-out infinite alternate; }
+.cloak { transform-box: view-box; transform-origin: 150px 246px; animation: sway 2.8s ease-in-out infinite alternate; }
 @keyframes sway { from { transform: skewX(1.6deg) } to { transform: skewX(-1.6deg) } }
 .q     { transform-box: fill-box; transform-origin: 50% 100%; animation: wonder 11s ease-in-out infinite; }
 @keyframes wonder { 0%, 58% { opacity: 0; transform: translateY(6px) scale(.6) }
@@ -198,7 +198,7 @@ def knight() -> None:
 SECTIONS = [
     ("about", "I.", "About", "A LITTLE ABOUT ME"),
     ("instruments", "II.", "Instruments", "LANGUAGES, SYSTEMS  &  METHODS"),
-    ("city", "III.", "The City", "MY CONTRIBUTIONS, REBUILT EVERY HOUR"),
+    ("city", "III.", "The City", "MY CONTRIBUTIONS, REBUILT EVERY FEW MINUTES"),
 ]
 
 
@@ -226,7 +226,7 @@ def section(t: dict, theme: str, key: str, num: str, title: str, sub: str) -> No
           "</g>",
           f'<line class="rl" x1="84" y1="{mid}" x2="{fmt(left_end)}" y2="{mid}" stroke="{t["accent"]}" stroke-width=".8" opacity=".6"/>',
           f'<line class="rr" x1="{fmt(right_start)}" y1="{mid}" x2="{W - 84}" y2="{mid}" stroke="{t["accent"]}" stroke-width=".8" opacity=".6"/>',
-          f'<g class="ed">{diamond(78, mid, 2.6, fill=t["blush"])}{diamond(W - 78, mid, 2.6, fill=t["mint"])}</g>',
+          f'<g class="ed">{diamond(78, mid, 2.6, fill=t["accent"])}{diamond(W - 78, mid, 2.6, fill=t["accent"])}</g>',
           '<g class="sb">', d.text(W / 2, top + 50, sub, "sans-m", 9, t["muted"], anchor="middle", tracking=3.4), "</g>")
     d.save(f"section-{key}-{theme}.svg")
 
