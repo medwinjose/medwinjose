@@ -387,7 +387,7 @@ def section(t: dict, theme: str, key: str, num: str, title: str, sub: str, extra
 # ==========================================================================
 # Selected work: two cards, each with a small animated motif
 # ==========================================================================
-CW, CH = 420, 154
+CW, CH = 420, 138
 
 
 def motif_crci(t: dict) -> str:
@@ -466,58 +466,56 @@ def _bar(x, base, w, h, color, rng) -> str:
 
 
 PROJECTS = [  # a hook only; the repositories hold the detail
-    dict(key="crci", url="crci", kicker="DISTRIBUTED SYSTEMS  ·  PREPRINT", title="CRCI", motif=motif_crci,
+    dict(key="crci", url="crci", kicker="DISTRIBUTED SYSTEMS  ·  PREPRINT", title="CRCI", motif=motif_crci, motif_w=117.4,  # rightmost node edge
          hook="Byzantine-fault-tolerant mesh networking, without consensus.",
          figure=("< 1 ms", "TO ISOLATE A MISBEHAVING PEER")),
-    dict(key="sentinel", url="sentinel", kicker="MARKET MICROSTRUCTURE", title="SENTINEL", motif=motif_sentinel,
+    dict(key="sentinel", url="sentinel", kicker="MARKET MICROSTRUCTURE", title="SENTINEL", motif=motif_sentinel, motif_w=122,  # end of the depth baseline
          hook="Market-making that defends itself against toxic order flow.",
          figure=("+10,843.99", "TICKS SAVED UNDER TOXIC FLOW")),
 ]
 
 
 def card(t: dict, theme: str, p: dict, index: int) -> None:
-    """A compact card on a strict 26px inner margin; type scaled down so it breathes."""
+    """An editorial entry rather than a UI card: no box, no fill, no accent bar.
+    A hairline above and below, with the text flush to the rules' ends."""
     d = Doc(CW, CH, f"{p['title']}: {p['hook']} {p['figure'][0]} {p['figure'][1].lower()}")
     delay = .15 + index * .12
     d.css.append(f"""
 .cd {{ animation: rise 1.3s {EASE_OUT} {delay:.2f}s both; }}
-.ac {{ transform-box: fill-box; transform-origin: 0 50%; animation: drawx 1.4s {EASE_OUT} {delay + .5:.2f}s both; }}
+.hl {{ transform-box: fill-box; transform-origin: 0 50%; animation: drawx 1.6s {EASE_OUT} {delay:.2f}s both; }}
 .ar {{ animation: nudge 6s ease-in-out {3 + index * .7:.1f}s infinite; }}
 @keyframes nudge {{ 0%, 86%, 100% {{ transform: none }} 92% {{ transform: translateX(3px) }} }}
 """)
-    # A soft light that glides along the card's top accent every few seconds.
-    d.defs.append(f'<linearGradient id="glint" gradientUnits="userSpaceOnUse" x1="-60" y1="0" x2="0" y2="0">'
-                  f'<stop offset="0" stop-color="{t["accent_hi"]}" stop-opacity="0"/>'
-                  f'<stop offset=".5" stop-color="{t["accent_hi"]}" stop-opacity=".9"/>'
-                  f'<stop offset="1" stop-color="{t["accent_hi"]}" stop-opacity="0"/>'
-                  f'<animateTransform attributeName="gradientTransform" type="translate" values="0 0;160 0;160 0" '
-                  f'keyTimes="0;.25;1" dur="8s" begin="{3 + index * 1.5:.1f}s" repeatCount="indefinite"/></linearGradient>')
-    top, pad, side = 4, 30, 14          # side: margin outside the card, so the pair has a 28px gutter
-    x0, L, R = side, side + pad, CW - side - pad
+    top, pad, inner = 4, 22, 14         # inner: half of the 28px gutter between the two entries
+    # The pair is shown at 49% width each (1% page margin either side). The outer
+    # edge is pulled in so the hairlines end exactly under the section rule's end
+    # diamonds (RULE_L / RULE_R), the same edges the Instruments columns use.
+    outer = round((RULE_L / W - .01) / .49 * CW)
+    L, R = (outer, CW - inner) if index == 0 else (inner, CW - outer)
     value, label = p["figure"]
-    kicker_base = top + pad + 6          # cap-height of 8px Inter sits on the inner margin
+    kicker_base = top + pad + 6          # cap-height of 8px Inter sits 22px below the top rule
     title_base = kicker_base + 26
     hook_base = title_base + 22
     fig_base = hook_base + 28
-    rect_h = fig_base + 4 + pad - top    # same 26px margin below the figure's descenders
-    d.add('<g class="cd">',
-          f'<rect x="{x0}" y="{top}" width="{CW - 2 * side}" height="{rect_h}" rx="12" fill="{t["surface"]}" stroke="{t["border"]}"/>',
-          f'<line class="ac" x1="{L}" y1="{top + .5}" x2="{L + 40}" y2="{top + .5}" stroke="{t["accent"]}" stroke-width="1.2"/>',
-          f'<line x1="{L}" y1="{top + .5}" x2="{L + 40}" y2="{top + .5}" stroke="url(#glint)" stroke-width="1.2"/>',
+    bottom_rule = fig_base + 4 + pad     # the same 22px below the figure's descenders
+    d.add(f'<line class="hl" x1="{L}" y1="{top + .5}" x2="{R}" y2="{top + .5}" stroke="{t["rule"]}" stroke-width="1"/>',
+          f'<line class="hl" x1="{L}" y1="{bottom_rule + .5}" x2="{R}" y2="{bottom_rule + .5}" stroke="{t["rule"]}" '
+          f'stroke-width="1" style="animation-delay:{delay + .25:.2f}s"/>',
+          '<g class="cd">',
           d.text(L, kicker_base, p["kicker"], "sans-m", 8, t["accent"], tracking=2.2),
           d.text(L, title_base, p["title"], "serif-b", 22, t["ink"]))
-    # Motif: right-aligned to the inner margin, top-aligned with the kicker's cap-height.
+    # Motif: right-aligned to the rule's end, top-aligned with the kicker's cap-height.
     ms = .46
-    d.add(f'<g transform="translate({R - 118 * ms:.1f},{top + pad:.1f}) scale({ms})">{p["motif"](t)}</g>')
+    d.add(f'<g transform="translate({R - p["motif_w"] * ms:.2f},{top + pad:.1f}) scale({ms})">{p["motif"](t)}</g>')
     size = 13.5
     while measure("serif-i", p["hook"], size) > R - L:
         size -= .25
     d.add(d.text(L, hook_base, p["hook"], "serif-i", size, t["soft"]))
     d.add(d.text(L, fig_base, value, "serif-b", 16.5, t["ink"]),
           d.text(L + measure("serif-b", value, 16.5) + 8, fig_base, label, "sans-m", 7.5, t["muted"], tracking=1.3),
-          f'<g class="ar">{arrow(R - 12, fig_base - 3.5, 12, t["accent"], 1.1)}</g>',
+          f'<g class="ar">{arrow(R - 12.55, fig_base - 3.5, 12, t["accent"], 1.1)}</g>',  # tip + round cap end on R
           "</g>")
-    assert CH == top + rect_h + top, (CH, top + rect_h + top)
+    assert CH == bottom_rule + 1 + top - 1, (CH, bottom_rule + top)
     d.save(f"card-{p['key']}-{theme}.svg")
 
 
