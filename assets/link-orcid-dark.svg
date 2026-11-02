@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="97" height="38" viewBox="0 0 97 38" role="img" aria-label="Orcid"><title>Orcid</title><style>@font-face { font-family: 'MJ-sans-m'; src: url(data:font/woff2;base64,d09GMgABAAAAAAQIABAAAAAABzwAAAOuAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGhYbgT4cKgZgP1NUQVRaAFQRCAqFDIQ7ATYCJAMcCxAABCAFgTYHIAwHG8EFUVRQ7oL8TMjwyngOWtRkUZMFd+bOL+/Gw//v97+fa5997SCmMrqGSPLQiUSzbFLhS+X5kF79mz2zAkt6TqpYgkr2jBLwh5JPaZKVMqUBC2Iwzv/l+G7rWL6242guOroCu5eNpWlIP1zAvUB7p02LB0EglroxfyWiMEbt7hwB+pECzQFJCBUhUJpuszx/4fL1uu6rPHvcwENFB44ZeDzx/EkDZWhiIOKeJB07cPakltPYHgGSJkPWUBf+pRLqksEyxporK6C4vwYGFQmhIKmV9i8NNFiqtdwz0XkJh3P+Tb5Cjsq4fA5wmxnSSwxLRl9UKZBkBPsTa9etWOcxTKytCf+1of5BMiAg76xcBvTWXAh1BdorMFw6dfrc1XDl0qHD54OII+f3HA8qqWqrp0CKKVoiBDEuvgIKSYo5IECidi3YsdlsNFeXZL3Nt8Qqa5sYoLd58XPsOTvI9rJttgkCmQ/RxKABaqAl2uIJEMMAGZRCEpJELnNuXi1ztfnAjrKyrVsbyla2rG5VoUWUm0JVs61JrVhfEjZeahbNlLFR79rYo6SO4oxWC1phgq7cenyb5EjvPFHpuAYqRvl6Srn96lWIg8XyDVBxKlcHGqpEzTtEqkfPpke34ObDqkrl6up3qUpBacYmF0vpqzU6rl2DFeVxukqNLJVMH+nYGhQfrhm3glJ643qdL6U3b3Cg8Dkk8AI7BArmo5TyguDD9R/SMTZ6wtjiSIIJTaCcz8MgHjvEXXFvQu8XXJAAO+iKNjvLse8/HGdss0ssO+8/Ic3ao136TC0oKCc1vNYyiD/NF//c2ir9eaqOC6qxSgsLylULfK6Zm74z3nIxBG0FJ1PmH9Tmf11bzft0u3ay4mTLXbf12YiXr+Yi6aaR02V0+WlLsKEOuImuaLuzEvv+g6Vsd4mi9S7W/vDeQNY7wgXuZF3Jz62dFpjI8ac4cXuLueTHBeEh5N7pe1ZW+L6tvej8s8LlviPVede8fUqj1s+qbPHL74xKq2OH7/zLGwMgkM0deynRLl7D839FmTr4WtbSC/BLvVU48zdBbl2BopBA8CO1q3110uR1isD2WmV2hFTuo7ByHNMSaw9zgwiyCdhbE6hZrASBCgdsVYjckLTEHRGaawmNw7oqk3U2UJmibqYyW3MLszJHaa21DjjkguP2OGuTA4445LDzVjhgvyMuOGGV0847Yp89juttnSOuOmCM8RqzxPko58PWOuWEPU4qgL8wDAw/IqxpTbYL) format('woff2'); font-weight: 500; font-style: normal; }
+.f-sans-m { font-family: 'MJ-sans-m', system-ui, -apple-system, 'Segoe UI', sans-serif; font-weight: 500; font-style: normal; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; } }
+@keyframes fade { from { opacity: 0 } to { opacity: 1 } }
+@keyframes rise { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
+@keyframes drawx { from { transform: scaleX(0) } to { transform: scaleX(1) } }
+@keyframes drawy { from { transform: scaleY(0) } to { transform: scaleY(1) } }
+@keyframes breathe { 0%, 100% { opacity: .55 } 50% { opacity: 1 } }
+.fb { transform-box: fill-box; }
+
+.c { animation: rise 1.2s cubic-bezier(.16,1,.3,1) 2.54s both; }
+.ar { animation: nudge 7s ease-in-out 5.04s infinite; }
+@keyframes nudge { 0%, 88%, 100% { transform: none } 94% { transform: translate(2px,-2px) } }
+</style><g class="c"><rect x="2" y="2" width="92.25" height="34" rx="17.0" fill="none" stroke="#2B2938"/><text x="22" y="22.4" class="f-sans-m" font-size="9.5" fill="#CBC6DC" letter-spacing="2.1">ORCID</text><g class="ar"><path d="M69.25 22.6 L76.45 15.4 M71.41 15.4 H76.45 V20.44" fill="none" stroke="#B7AAFF" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" /></g></g></svg>
