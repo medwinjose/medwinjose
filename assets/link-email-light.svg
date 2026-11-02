@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="38" viewBox="0 0 96 38" role="img" aria-label="Email"><title>Email</title><style>@font-face { font-family: 'MJ-sans-m'; src: url(data:font/woff2;base64,d09GMgABAAAAAAOkABAAAAAABsgAAANKAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGhYbgTwcKgZgP1NUQVRaAFQRCAqEHINSATYCJAMcCxAABCAFgTYHIAwHG1YFAB6Dbdu4LMtZTlXVeC8/5ePh+f3Mzn3/JfmBZkoImRLQomJVI5ZRVa5jCwQOyE5+fl29Wehk/bORAERoDmByaIqb/4USE5fT/32+fW3HsRpjAWf1YiGF0zpfFm2LAg6ke6DebOEWK0zBvCYSffuTAi1AEkJFCDSsdhRp42YXHxC+UJiVAvJXsmKTQf7WyJw0kJehS4g7SbrlUlYasLOSFwGckiGrK8VIq4RSMl3GQh0kBQDGAh3m6cVco1hE4FSO/rmppkt59p5xwTKxO+e/4keFyqJ8gUd1RXrXE2noHVQKJBkBAPsPuHoDbrxdNbwvUH6behCQT1duMV5LCKUCgxWYLd1xZ3YRZsjdVxJyMEz8oHM1DCGoGmisQIoV2ghBLIofFJIUvQABEtXzAYdkHaCllGTj9bLlyLULD+DyWfc3uM3uWndFEL8doksPqIE2+uNJ/AHIoPHOl8qNnFvVRq622tNZe869l724pwBbNI4Eq+bxxFYcbGAw39CMpkYczqg57PHSqorL84fRkNc37+9X2Cj67NWP5f4Ln4JgjMvrPIl26sncH68UN6le2JNbeeIBWSnG2Oc5iZ1V6g0r48/ulIkWMIqefOz6sYzkrYDquhvDy1D+cFOiAToweXoss9RWPj+VA2LxOl6BM7d16DaEUAWOW5RP3tAw86jjw+6ZCEkUgcot3szu8HY5djsiOrRLZUSAzgS5W0Gpg9v/ZMykYjy4dLfVtXc8eMXDubrNFBq2qFteUPno1f3Dje697rPzfRj+wC1mf6GGF4x++7l3TmfnCm//B+lsuXqp6n3NHamqcX6Z/Adeov9+IH/0s7Q6Vp7aUqf1A3gc1HtV2xXzHnl4pPd4vKW/5XPU2jR6BVx4RbNeIVUtkAYQyNbX9X8TCOcw/Z9GLMFPd9V3AH5vK+0Fnb6I6kwNAYUEgi98UttFh5y1qASR+rVKJxwq8xblOy8kdS/kOi/UXE0kaQRqtmKAQI0djiOKXJe0sQ0RWtrgInSksNxwU4UVSmuFDlabn6UXw35eYsXLlSJSFn+xEsVLkMNVrBiJcqVylyFHomiRUkg6IFGRWFoWRwlHOV7Wl3lJlypSGiLQN+8JYvq1YH6T1Ao=) format('woff2'); font-weight: 500; font-style: normal; }
+.f-sans-m { font-family: 'MJ-sans-m', system-ui, -apple-system, 'Segoe UI', sans-serif; font-weight: 500; font-style: normal; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; } }
+@keyframes fade { from { opacity: 0 } to { opacity: 1 } }
+@keyframes rise { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
+@keyframes drawx { from { transform: scaleX(0) } to { transform: scaleX(1) } }
+@keyframes drawy { from { transform: scaleY(0) } to { transform: scaleY(1) } }
+@keyframes breathe { 0%, 100% { opacity: .55 } 50% { opacity: 1 } }
+.fb { transform-box: fill-box; }
+
+.c { animation: rise 1.2s cubic-bezier(.16,1,.3,1) 2.82s both; }
+.ar { animation: nudge 7s ease-in-out 6.32s infinite; }
+@keyframes nudge { 0%, 88%, 100% { transform: none } 94% { transform: translate(2px,-2px) } }
+</style><g class="c"><rect x="2" y="2" width="91.49" height="34" rx="17.0" fill="none" stroke="#EAE6F5"/><text x="22" y="22.4" class="f-sans-m" font-size="9.5" fill="#4A4561" letter-spacing="2.1">EMAIL</text><g class="ar"><path d="M68.49 22.6 L75.69 15.4 M70.65 15.4 H75.69 V20.44" fill="none" stroke="#6D5BDB" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" /></g></g></svg>

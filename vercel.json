@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/city.py": {
+      "includeFiles": "{scripts/**,assets/fonts/**}"
+    }
+  }
+}

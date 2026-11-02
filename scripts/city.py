@@ -22,7 +22,7 @@ import urllib.request
 
 from svgkit import EASE_OUT, THEMES, Doc, diamond, fmt
 
-W, H = 840, 470
+W, H = 840, 416
 U = (12.2, 3.55)    # screen offset of one week step
 V = (-10.4, 5.25)   # screen offset of one weekday step
 MAX_H = 112
@@ -145,7 +145,7 @@ def render(days: list[tuple[dt.date, int]], theme: str, live: bool) -> Doc:
 
     span_x = weeks * U[0] - 7 * V[0]
     ox = (W - span_x) / 2 - 7 * V[0] + 6
-    oy = H - (weeks * U[1] + 7 * V[1]) - 46
+    oy = H - (weeks * U[1] + 7 * V[1]) - 25
 
     def P(a, b, z=0.0):
         return ox + a * U[0] + b * V[0], oy + a * U[1] + b * V[1] - z
@@ -168,7 +168,7 @@ def render(days: list[tuple[dt.date, int]], theme: str, live: bool) -> Doc:
     rng = random.Random(7)
 
     # Moon (dark) or a faint sun (light), top-left above the oldest weeks.
-    mx, my = 74, 64
+    mx, my = 74, 36
     if theme == "dark":
         doc.defs.append(f'<radialGradient id="glow"><stop offset="0" stop-color="{t["butter"]}" stop-opacity=".35"/>'
                         f'<stop offset="1" stop-color="{t["butter"]}" stop-opacity="0"/></radialGradient>'
@@ -234,24 +234,24 @@ def render(days: list[tuple[dt.date, int]], theme: str, live: bool) -> Doc:
     rx = W - 40
     doc.add('<g class="cap">')
     if live:
-        doc.add(doc.text(rx, 66, f"{s['total']:,}", "serif-b", 44, t["ink"], anchor="end"),
-                doc.text(rx, 88, "contributions in the last year", "serif-i", 16.5, t["soft"], anchor="end"))
+        doc.add(doc.text(rx, 36, f"{s['total']:,}", "serif-b", 44, t["ink"], anchor="end"),
+                doc.text(rx, 58, "contributions in the last year", "serif-i", 16.5, t["soft"], anchor="end"))
         ledger = [("LONGEST STREAK", f"{s['longest']} days"),
                   ("BUSIEST DAY", f"{s['best_day'].strftime('%-d %b')} · {s['best']}"),
                   ("MOST ACTIVE ON", s["weekday"])]
         for i, (k, v) in enumerate(ledger):
-            y = 122 + i * 22
+            y = 92 + i * 22
             doc.add(doc.text(rx - 112, y, k, "sans-m", 8, t["muted"], anchor="end", tracking=1.8),
                     diamond(rx - 100, y - 3, 1.6, fill=t["blush"]),
                     doc.text(rx, y, v, "serif", 15.5, t["ink"], anchor="end"))
     else:
-        doc.add(doc.text(rx, 70, "One building for every day.", "serif-i", 19, t["soft"], anchor="end"),
-                doc.text(rx, 94, "REBUILT HOURLY FROM THE CONTRIBUTION GRAPH", "sans-m", 8, t["muted"], anchor="end",
+        doc.add(doc.text(rx, 30, "One building for every day.", "serif-i", 19, t["soft"], anchor="end"),
+                doc.text(rx, 54, "REBUILT HOURLY FROM THE CONTRIBUTION GRAPH", "sans-m", 8, t["muted"], anchor="end",
                          tracking=1.8))
     doc.add("</g>")
 
     # Legend, bottom-left.
-    lx, ly = 40, H - 26
+    lx, ly = 40, H - 6
     doc.add('<g class="cap">', doc.text(lx, ly, "QUIET", "sans-m", 7.5, t["muted"], tracking=1.6))
     x = lx + 42
     for i, col in enumerate(tiers):
