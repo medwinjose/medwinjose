@@ -177,7 +177,7 @@ def render(days: list[tuple[dt.date, int]], theme: str, live: bool) -> Doc:
     rng = random.Random(7)
 
     # Moon (dark) or a faint sun (light), top-left above the oldest weeks.
-    mx, my = 74, 36
+    mx, my = 74, 32
     if theme == "dark":
         doc.defs.append(f'<radialGradient id="glow"><stop offset="0" stop-color="{t["butter"]}" stop-opacity=".35"/>'
                         f'<stop offset="1" stop-color="{t["butter"]}" stop-opacity="0"/></radialGradient>'
@@ -243,19 +243,19 @@ def render(days: list[tuple[dt.date, int]], theme: str, live: bool) -> Doc:
     rx = W - 40
     doc.add('<g class="cap">')
     if live:
-        doc.add(doc.text(rx, 36, f"{s['total']:,}", "serif-b", 44, t["ink"], anchor="end"),
-                doc.text(rx, 58, "contributions in the last year", "serif-i", 16.5, t["soft"], anchor="end"))
+        doc.add(doc.text(rx, 32, f"{s['total']:,}", "serif-b", 44, t["ink"], anchor="end"),
+                doc.text(rx, 54, "contributions in the last year", "serif-i", 16.5, t["soft"], anchor="end"))
         ledger = [("LONGEST STREAK", f"{s['longest']} days"),
                   ("BUSIEST DAY", f"{s['best_day'].strftime('%-d %b')} · {s['best']}"),
                   ("MOST ACTIVE ON", s["weekday"])]
         for i, (k, v) in enumerate(ledger):
-            y = 92 + i * 22
+            y = 88 + i * 22
             doc.add(doc.text(rx - 112, y, k, "sans-m", 8, t["muted"], anchor="end", tracking=1.8),
                     diamond(rx - 100, y - 3, 1.6, fill=t["blush"]),
                     doc.text(rx, y, v, "serif", 15.5, t["ink"], anchor="end"))
     else:
-        doc.add(doc.text(rx, 30, "One building for every day.", "serif-i", 19, t["soft"], anchor="end"),
-                doc.text(rx, 54, "REBUILT FROM THE CONTRIBUTION GRAPH", "sans-m", 8, t["muted"], anchor="end",
+        doc.add(doc.text(rx, 26, "One building for every day.", "serif-i", 19, t["soft"], anchor="end"),
+                doc.text(rx, 50, "REBUILT FROM THE CONTRIBUTION GRAPH", "sans-m", 8, t["muted"], anchor="end",
                          tracking=1.8))
     doc.add("</g>")
 
