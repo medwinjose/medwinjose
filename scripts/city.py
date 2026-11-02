@@ -4,7 +4,7 @@
     python scripts/city.py --demo                      # synthetic placeholder
 
 Each day is a city block; the taller the building, the more was committed that day.
-Writes assets/city-dark.svg and assets/city-light.svg. Runs hourly via
+Writes assets/city-dark.svg and assets/city-light.svg. Rebuilt every few minutes by
 .github/workflows/city.yml.
 """
 
@@ -26,6 +26,7 @@ W, H = 840, 416
 U = (12.2, 3.55)    # screen offset of one week step
 V = (-10.4, 5.25)   # screen offset of one weekday step
 MAX_H = 112
+LOOP = 18           # seconds per rebuild cycle of the skyline
 GAP = 0.13          # inset of each building inside its block
 
 QUERY = """query($login: String!) { user(login: $login) { contributionsCollection { contributionCalendar {
@@ -155,8 +156,16 @@ def render(days: list[tuple[dt.date, int]], theme: str, live: bool) -> Doc:
              if live else "Contribution city: one building per day of the last year")
     doc = Doc(W, H, title)
     doc.css.append(f"""
-.b   {{ transform-box: fill-box; transform-origin: 50% 100%; animation: grow 1.1s {EASE_OUT} both; }}
-@keyframes grow {{ from {{ transform: scaleY(0); opacity: 0 }} 30% {{ opacity: 1 }} to {{ transform: scaleY(1) }} }}
+/* An image can't tell when it is scrolled into view, so the city rebuilds on a
+   slow loop: every {LOOP}s the buildings settle and rise again, one by one,
+   left to right, and a visitor always catches it building within seconds. */
+.b   {{ transform-box: fill-box; transform-origin: 50% 100%; animation: build {LOOP}s linear infinite both; }}
+@keyframes build {{
+  0%   {{ transform: scaleY(0); opacity: 0; animation-timing-function: cubic-bezier(.2,.8,.25,1) }}
+  1.5% {{ opacity: 1 }}
+  6%   {{ transform: scaleY(1); opacity: 1 }}
+  93%  {{ transform: scaleY(1); opacity: 1; animation-timing-function: cubic-bezier(.5,0,.75,0) }}
+  98%, 100% {{ transform: scaleY(0); opacity: 0 }} }}
 .g   {{ animation: fade 1.4s ease-out both; }}
 .tw  {{ animation: twinkle ease-in-out infinite; }}
 @keyframes twinkle {{ 0%, 100% {{ opacity: .15 }} 45%, 60% {{ opacity: .95 }} }}
@@ -227,7 +236,7 @@ def render(days: list[tuple[dt.date, int]], theme: str, live: bool) -> Doc:
                         cls = ' class="tw"'
                         sty = f' style="animation-duration:{rng.uniform(5, 11):.1f}s;animation-delay:{rng.uniform(3, 12):.1f}s"'
                     windows.append(poly(quad, t["window"], f'fill-opacity="{.75 if theme == "dark" else .9}"{cls}{sty}'))
-        delay = .25 + (w + wd) * .032
+        delay = .3 + w * .05 + wd * .015  # sweeps left to right, one building after another
         doc.add(f'<g class="b" style="animation-delay:{delay:.2f}s">{"".join(faces)}{"".join(windows)}</g>')
 
     # Captions: headline figure top-right, small ledger beneath it.
@@ -246,7 +255,7 @@ def render(days: list[tuple[dt.date, int]], theme: str, live: bool) -> Doc:
                     doc.text(rx, y, v, "serif", 15.5, t["ink"], anchor="end"))
     else:
         doc.add(doc.text(rx, 30, "One building for every day.", "serif-i", 19, t["soft"], anchor="end"),
-                doc.text(rx, 54, "REBUILT HOURLY FROM THE CONTRIBUTION GRAPH", "sans-m", 8, t["muted"], anchor="end",
+                doc.text(rx, 54, "REBUILT FROM THE CONTRIBUTION GRAPH", "sans-m", 8, t["muted"], anchor="end",
                          tracking=1.8))
     doc.add("</g>")
 
