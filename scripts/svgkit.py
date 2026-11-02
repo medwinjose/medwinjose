@@ -100,7 +100,9 @@ def _subset_b64(face: str, chars: str) -> str:
     opts.layout_features = ["kern", "liga", "lnum", "pnum"]
     opts.name_IDs = []
     opts.notdef_outline = True
-    font = TTFont(FONT_DIR / FACES[face][3])
+    # recalcTimestamp=False keeps the output byte-identical between builds, so the
+    # city workflow only commits when the picture really changed.
+    font = TTFont(FONT_DIR / FACES[face][3], recalcTimestamp=False)
     sub = subset.Subsetter(opts)
     sub.populate(text=chars)
     sub.subset(font)

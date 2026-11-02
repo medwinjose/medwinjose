@@ -35,9 +35,14 @@ jobs:
       - name: Install font tooling
         run: pip install fonttools brotli
 
+      # Private contributions: if a CITY_TOKEN secret exists (a personal access
+      # token of the profile owner), the calendar is read as the owner and
+      # includes private work. Otherwise the built-in token is used, which sees
+      # private contributions only when "Private contributions" is switched on
+      # in the profile's contribution settings.
       - name: Render city from contribution data
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.CITY_TOKEN || secrets.GITHUB_TOKEN }}
         run: python scripts/city.py --login "${{ github.repository_owner }}"
 
       - name: Commit if changed

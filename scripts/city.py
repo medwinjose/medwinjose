@@ -29,7 +29,11 @@ MAX_H = 112
 LOOP = 7            # seconds per rebuild cycle of the skyline
 GAP = 0.13          # inset of each building inside its block
 
-QUERY = """query($login: String!) { user(login: $login) { contributionsCollection { contributionCalendar {
+# restrictedContributionsCount = private contributions the token cannot see in
+# detail; they are still included in the calendar counts when the profile shows
+# private contributions, or fully visible when the token belongs to the user.
+QUERY = """query($login: String!) { user(login: $login) { contributionsCollection {
+  restrictedContributionsCount contributionCalendar {
   totalContributions weeks { contributionDays { date contributionCount weekday } } } } } }"""
 
 
@@ -44,7 +48,13 @@ def fetch_graphql(login: str, token: str) -> list[tuple[dt.date, int]]:
     )
     with urllib.request.urlopen(req, timeout=30) as r:
         payload = json.load(r)
-    weeks = payload["data"]["user"]["contributionsCollection"]["contributionCalendar"]["weeks"]
+    if payload.get("errors"):
+        raise RuntimeError(payload["errors"][0].get("message", "GraphQL error"))
+    coll = payload["data"]["user"]["contributionsCollection"]
+    cal = coll["contributionCalendar"]
+    print(f"calendar: {cal['totalContributions']} contributions in the last year "
+          f"(of which private/restricted: {coll['restrictedContributionsCount']})", file=sys.stderr)
+    weeks = cal["weeks"]
     return [(dt.date.fromisoformat(d["date"]), d["contributionCount"]) for w in weeks for d in w["contributionDays"]]
 
 
