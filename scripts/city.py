@@ -171,24 +171,29 @@ def render(days: list[tuple[dt.date, int]], theme: str, live: bool) -> Doc:
 @keyframes twinkle {{ 0%, 100% {{ opacity: .15 }} 45%, 60% {{ opacity: .95 }} }}
 .cap {{ animation: rise 1.4s {EASE_OUT} 2.4s both; }}
 .moon {{ animation: fade 2s ease-out 2s both; }}
-.halo {{ transform-box: fill-box; transform-origin: center; animation: fade 2s ease-out 2s both, halo 7s ease-in-out 4s infinite; }}
-@keyframes halo {{ 0%, 100% {{ opacity: .35; transform: scale(1) }} 50% {{ opacity: .6; transform: scale(1.12) }} }}
+.halo {{ transform-box: fill-box; transform-origin: center; animation: fade 2s ease-out 1s both, halo 6s ease-in-out 3s infinite; }}
+@keyframes halo {{ 0%, 100% {{ opacity: .45; transform: scale(1) }} 50% {{ opacity: .85; transform: scale(1.12) }} }}
+.star {{ animation: twinkle ease-in-out infinite; }}
 """)
     rng = random.Random(7)
 
     # Moon (dark) or a faint sun (light), top-left above the oldest weeks.
-    mx, my = 74, 32
+    mx, my = 74, 38  # halo (r 30, breathing to x1.12) clears the top edge
     if theme == "dark":
         doc.defs.append(f'<radialGradient id="glow"><stop offset="0" stop-color="{t["butter"]}" stop-opacity=".35"/>'
                         f'<stop offset="1" stop-color="{t["butter"]}" stop-opacity="0"/></radialGradient>'
                         f'<mask id="cres"><rect width="{W}" height="{H}" fill="#fff"/>'
                         f'<circle cx="{mx + 7}" cy="{my - 5}" r="12.5" fill="#000"/></mask>')
-        doc.add(f'<circle class="halo" cx="{mx}" cy="{my}" r="38" fill="url(#glow)"/>',
+        for sx, sy, sr, sd, sdl in [(128, 22, 1.1, 5.5, 0), (172, 46, .9, 7, 2.1), (40, 70, .8, 6.2, 3.4), (214, 18, .8, 8, 1.2),
+                                    (300, 34, .9, 6.6, 4.4), (380, 14, .7, 7.4, 2.8)]:
+            doc.add(f'<circle class="star" cx="{sx}" cy="{sy}" r="{sr}" fill="{t["butter"]}" '
+                    f'style="animation-duration:{sd}s;animation-delay:{sdl}s"/>')
+        doc.add(f'<circle class="halo" cx="{mx}" cy="{my}" r="30" fill="url(#glow)"/>',
                 f'<circle class="moon" cx="{mx}" cy="{my}" r="13" fill="{t["butter"]}" mask="url(#cres)" opacity=".9"/>')
     else:
         doc.defs.append(f'<radialGradient id="glow"><stop offset="0" stop-color="{t["butter"]}" stop-opacity=".55"/>'
                         f'<stop offset="1" stop-color="{t["butter"]}" stop-opacity="0"/></radialGradient>')
-        doc.add(f'<circle class="halo" cx="{mx}" cy="{my}" r="40" fill="url(#glow)"/>',
+        doc.add(f'<circle class="halo" cx="{mx}" cy="{my}" r="30" fill="url(#glow)"/>',
                 f'<circle class="moon" cx="{mx}" cy="{my}" r="12" fill="{t["butter"]}" opacity=".5"/>')
 
     # Ground: every day is a block, drawn once as a faint tile.
