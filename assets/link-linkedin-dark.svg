@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="124" height="40" viewBox="0 0 124 40" role="img" aria-label="Linkedin"><title>Linkedin</title><style>@font-face { font-family: 'MJ-sans-m'; src: url(data:font/woff2;base64,d09GMgABAAAAAAPQABAAAAAABwAAAANzAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGhYbgTQcKgZgP1NUQVRaAFQRCAqEVINyATYCJAMgCxIABCAFgTYHIAwHG3IFAI7UTvWHyVYN4uk7q15PTzLxrk9AnwT9Eel/ANjCA+fURfkAKwAk8p3Ap4XYbzfM5AZK3MVGcnW2WLzGZKJN2ko/Pv2TCOAHABSC4EIQwEsR6qNLl61cm0StBvTsTLp2Pdt0Il3nFr27kg4NEIYgZxhUpzY9uxKcwhhAAFZhQePBQRBTBTgo0qCBbBTDRtHN6kBagp0/3ELXTaUjAyoRrBVPcA4AAGj9Ub5ig51bXwEW2gJ1hSVqWRSwLUChAQEAAKhZq0otjpOCqu7j/6PAeaJmAwKgm9o3gRT4EQQHC4jBArKgunXvNVAKQL927XuLID/mPE0MChdRJEMAJQUJAoKA5JavgIVCSQkABAAFb09IC2sM4Mep+rQUlKEClakaBqSgNBWopEQ6/M4RBx2wPwEAAECQMEIAOABEANHABuA/AKAB8KIQBAtBQHu19ru82uWP037tdWtXkgHBQaH+BMRbT/z4GqqAVdsrCHrxiQ+v1I3IUxdqWA6rq7rhNebIkF8Ck+7dkxF373rp+hcPGH7/+cAB3kG+QZEEVejpDNKq7eTetbheu0DvuP6DfKp+HR3qWG+Aj1YHhLA8gQFb7typ472LrLjVnH8gqdb13cGdcBUfsXw7zvPtycdjjLl3d2gJY+7fG4ah+LHjw4+Hj2UYVWMMrx4vPqx1n5vl4bVwfLnsa57CNDfDij+nteXHho3a9ObTrYd1b86E7udbb3g2pNvX7du6fno4ZFX/8+MeF9yxrvL7D+urmF3J8t7Evvl6z7Fmm7/x9NnDs07NunT5NAnmeE8qO+l1jorNR3UYVrjUiqup+u9/mbJVkmPjY6uW1S3Xzt/3p25Nv2o8a3IawVWn6U+5U0f3O1RmQJX5aRskcWo7a60Zuaq/w77pJO+VML2pPKrx5pKD0ugunqN6ZpbEACCApuSsJkVmNQsV+eZYDgAv+46bDvAuGJrImv/N7fZuA1goAAS+gKwrEEGQv5/D7RjHNlLePssafYs1Khtr7OEcGKtmCVQqQCiH8ngHCNjkpiEWoj0oggCFCH6CYG40EVOABKRjCuJQjDH4KfstJfBSk5q0oR196EwLelKPNnSgHe3pTRXa0JoO9KEL1ehObzrQihZ0JgW16MBA2pCTPF6yAr3VqJjVpBtdaEFXLAD4v5klLL37JbzrKQAAAA==) format('woff2'); font-weight: 500; font-style: normal; }
+.f-sans-m { font-family: 'MJ-sans-m', system-ui, -apple-system, 'Segoe UI', sans-serif; font-weight: 500; font-style: normal; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; } }
+@keyframes fade { from { opacity: 0 } to { opacity: 1 } }
+@keyframes rise { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
+@keyframes drawx { from { transform: scaleX(0) } to { transform: scaleX(1) } }
+@keyframes drawy { from { transform: scaleY(0) } to { transform: scaleY(1) } }
+@keyframes breathe { 0%, 100% { opacity: .55 } 50% { opacity: 1 } }
+.fb { transform-box: fill-box; }
+
+.c { animation: rise 1.2s cubic-bezier(.16,1,.3,1) 2.72s both; }
+.ar { animation: nudge 6s ease-in-out 4.48s infinite; }
+@keyframes nudge { 0%, 86%, 100% { transform: none } 92% { transform: translate(2px,-2px) } }
+</style><g class="c"><rect x="2" y="2" width="119.75" height="36" rx="18.0" fill="none" stroke="#262B33"/><text x="24" y="23.6" class="f-sans-m" font-size="10" fill="#BDB5A6" letter-spacing="2.2">LINKEDIN</text><g class="ar"><path d="M95.75 24 L103.75 16 M98.15 16 H103.75 V21.6" fill="none" stroke="#CDAE74" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" /></g></g></svg>

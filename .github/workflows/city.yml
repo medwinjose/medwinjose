@@ -1,0 +1,48 @@
+name: Rebuild contribution city
+
+on:
+  schedule:
+    - cron: "23 19 * * *" # 00:53 IST, every night
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/**"
+      - ".github/workflows/city.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: city
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install font tooling
+        run: pip install fonttools brotli
+
+      - name: Render city from contribution data
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/city.py --login "${{ github.repository_owner }}"
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/city-dark.svg assets/city-light.svg
+          if git diff --cached --quiet; then
+            echo "City unchanged."
+          else
+            git commit -m "Rebuild contribution city"
+            git push
+          fi
