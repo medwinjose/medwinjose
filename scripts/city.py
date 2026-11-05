@@ -22,7 +22,11 @@ import urllib.request
 
 from svgkit import EASE_OUT, THEMES, Doc, diamond, fmt
 
-W, H = 840, 416
+W, SCENE_H = 840, 416
+CAPTION_H = 31     # caption line set inside the image, so it never reflows with the window
+H = SCENE_H + CAPTION_H
+CAPTION = ("Each building is one day; its height is that day's contributions. "
+           "Rebuilt every few minutes from my GitHub activity.")
 U = (12.2, 3.55)    # screen offset of one week step
 V = (-10.4, 5.25)   # screen offset of one weekday step
 MAX_H = 112
@@ -180,7 +184,7 @@ def render(days: list[tuple[dt.date, int]], theme: str, live: bool) -> Doc:
 
     span_x = weeks * U[0] - 7 * V[0]
     ox = (W - span_x) / 2 - 7 * V[0] + 6
-    oy = H - (weeks * U[1] + 7 * V[1]) - 25
+    oy = SCENE_H - (weeks * U[1] + 7 * V[1]) - 25
 
     def P(a, b, z=0.0):
         return ox + a * U[0] + b * V[0], oy + a * U[1] + b * V[1] - z
@@ -296,7 +300,7 @@ def render(days: list[tuple[dt.date, int]], theme: str, live: bool) -> Doc:
     doc.add("</g>")
 
     # Legend, bottom-left.
-    lx, ly = 40, H - 6
+    lx, ly = 40, SCENE_H - 6
     doc.add('<g class="cap">', doc.text(lx, ly, "QUIET", "sans-m", 7.5, t["muted"], tracking=1.6))
     x = lx + 42
     for i, col in enumerate(tiers):
@@ -304,6 +308,7 @@ def render(days: list[tuple[dt.date, int]], theme: str, live: bool) -> Doc:
         doc.add(f'<rect x="{fmt(x)}" y="{fmt(ly - hh + 1)}" width="7" height="{fmt(hh)}" rx="1" fill="{col}"/>')
         x += 11
     doc.add(doc.text(x + 6, ly, "BUSY", "sans-m", 7.5, t["muted"], tracking=1.6), "</g>")
+    doc.add('<g class="cap">', doc.text(W / 2, SCENE_H + 22, CAPTION, "serif-i", 15.5, t["soft"], anchor="middle"), "</g>")
     return doc
 
 

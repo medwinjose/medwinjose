@@ -12,6 +12,7 @@ from xml.sax.saxutils import escape
 import random
 
 from svgkit import EASE_OUT, THEMES, Doc, arrow, arrow_ne, diamond, fmt, measure, wrap
+from wisp import EXTENT_X, EXTENT_Y, wisp_parts
 
 W = 840  # Matches the README column; images scale down on smaller screens.
 
@@ -64,7 +65,7 @@ def header(t: dict, theme: str) -> None:
         f'<stop offset=".65" stop-color="{t["blush"]}" stop-opacity=".9"/>'
         f'<stop offset="1" stop-color="{t["blush"]}" stop-opacity="0"/>'
         f'<animateTransform attributeName="gradientTransform" type="translate" values="0 0;1150 0;1150 0" '
-        f'keyTimes="0;.24;1" dur="11s" begin="1.6s" repeatCount="indefinite"/></linearGradient>'
+        f'keyTimes="0;.48;1" dur="5.5s" begin="1.6s" repeatCount="indefinite"/></linearGradient>'
     )
     d.add('<g class="nm">',
           d.text(cx, 66, name, "serif", 48, t["ink"], anchor="middle", tracking=11.5),
@@ -116,119 +117,9 @@ def chip(t: dict, theme: str, key: str, label: str, index: int) -> None:
 # The Knight: a small companion who looks around, tilts its head and blinks.
 # One file; the white mask and outlined cloak read on both themes.
 # ==========================================================================
-def knight_parts(d: Doc) -> str:
-    """The knight in its own 300x300 drawing space; returns markup and adds its CSS to ``d``.
-
-    Every 13 seconds it looks left, looks right, tilts its head with a little
-    "?", then has an "aha" moment: happy squinting eyes, a tiny hop and two
-    sparkles. It blinks on its own rhythm. Pivots use fill-box so the figure
-    can be placed and scaled anywhere.
-    """
-    mask, eye, cloak, rim, line = "#F8F6FF", "#0F0E17", "#363859", "#A79BF5", "#2B2944"
-    lav, lav_dk, blush, mint = "#B7AAFF", "#8C7EE6", "#FFB4C8", "#93E6CC"
-    d.css.append("""
-.kn-all  { animation: bob 2.8s ease-in-out infinite alternate; }
-@keyframes bob { from { transform: translateY(0) } to { transform: translateY(-5px) } }
-.kn-hop  { animation: hop 13s ease-in-out infinite; }
-@keyframes hop { 0%, 66% { transform: none } 69% { transform: translateY(-9px) } 72% { transform: none }
-  74.5% { transform: translateY(-4px) } 77%, 100% { transform: none } }
-.kn-shadow { transform-box: fill-box; transform-origin: center; animation: shrink 2.8s ease-in-out infinite alternate; }
-@keyframes shrink { from { transform: scaleX(1); opacity: .5 } to { transform: scaleX(.86); opacity: .32 } }
-.kn-head { transform-box: fill-box; transform-origin: 50% 96%; animation: look 13s ease-in-out infinite; }
-@keyframes look {
-  0%, 8%    { transform: none }
-  12%, 22%  { transform: translateX(-5px) rotate(-3deg) }
-  28%, 38%  { transform: translateX(5px) rotate(3deg) }
-  44%, 58%  { transform: rotate(-11deg) }
-  64%, 80%  { transform: rotate(3deg) }
-  86%, 100% { transform: none } }
-.kn-eyes { animation: glance 13s ease-in-out infinite; }
-@keyframes glance {
-  0%, 8%    { transform: none }
-  12%, 22%  { transform: translateX(-6px) }
-  28%, 38%  { transform: translateX(6px) }
-  44%, 58%  { transform: translate(-2px, 1px) }
-  64%, 100% { transform: none } }
-.kn-open  { animation: open 13s step-end infinite; }
-@keyframes open { 0% { opacity: 1 } 65% { opacity: 0 } 81% { opacity: 1 } }
-.kn-happy { opacity: 0; animation: happy 13s step-end infinite; }
-@keyframes happy { 0% { opacity: 0 } 65% { opacity: 1 } 81% { opacity: 0 } }
-@media (prefers-reduced-motion: reduce) { .kn-happy { display: none } }
-.kn-blink { transform-box: fill-box; transform-origin: center; animation: blink 4.6s ease-in-out infinite; }
-@keyframes blink { 0%, 44%, 52%, 100% { transform: none } 48% { transform: scaleY(.08) } }
-.kn-cloak { transform-box: fill-box; transform-origin: 50% 0; animation: sway 2.8s ease-in-out infinite alternate; }
-@keyframes sway { from { transform: skewX(1.6deg) } to { transform: skewX(-1.6deg) } }
-.kn-tail  { transform-box: fill-box; transform-origin: 0 25%; animation: flutter 2.2s ease-in-out infinite alternate; }
-@keyframes flutter { from { transform: rotate(-7deg) } to { transform: rotate(6deg) } }
-.kn-q     { transform-box: fill-box; transform-origin: 50% 100%; animation: wonder 13s ease-in-out infinite; }
-@keyframes wonder { 0%, 44% { opacity: 0; transform: translateY(6px) scale(.6) }
-  48%, 57% { opacity: 1; transform: none } 61%, 100% { opacity: 0; transform: translateY(-4px) } }
-.kn-spark { transform-box: fill-box; transform-origin: center; animation: spark 13s ease-out infinite; }
-@keyframes spark { 0%, 65% { opacity: 0; transform: scale(.2) rotate(0) } 69% { opacity: 1; transform: scale(1.1) rotate(25deg) }
-  76% { opacity: 1; transform: scale(1) rotate(45deg) } 81%, 100% { opacity: 0; transform: scale(.4) rotate(70deg) } }
-.kn-mote  { animation: drift linear infinite; }
-@keyframes drift { 0% { transform: translateY(0); opacity: 0 } 15% { opacity: .9 } 100% { transform: translateY(-120px); opacity: 0 } }
-.kn-glow  { transform-box: fill-box; transform-origin: center; animation: breathe 6s ease-in-out infinite; }
-""")
-    d.defs.append(f'<radialGradient id="halo"><stop offset="0" stop-color="{lav}" stop-opacity=".32"/>'
-                  f'<stop offset="1" stop-color="{lav}" stop-opacity="0"/></radialGradient>')
-
-    def horn(sign: int) -> str:
-        m = (lambda x: x) if sign < 0 else (lambda x: 300 - x)
-        return (f'<path d="M{m(115)} 116 C{m(106)} 98 {m(100)} 78 {m(106)} 52 C{m(114)} 72 {m(124)} 90 {m(138)} 106 Z" '
-                f'fill="{mask}" stroke="{line}" stroke-width="2.2" stroke-linejoin="round"/>')
-
-    def star(cx, cy, r, color, delay) -> str:
-        k = r * .16
-        path = (f"M{cx} {cy - r} Q{cx + k} {cy - k} {cx + r} {cy} Q{cx + k} {cy + k} {cx} {cy + r} "
-                f"Q{cx - k} {cy + k} {cx - r} {cy} Q{cx - k} {cy - k} {cx} {cy - r} Z")
-        return f'<path class="kn-spark" d="{path}" fill="{color}" style="animation-delay:{delay}s"/>'
-
-    out = [f'<circle class="kn-glow" cx="150" cy="160" r="118" fill="url(#halo)"/>']
-    for x, y, r, col, dur, delay in [(78, 250, 2.2, lav, 7, 0), (222, 236, 1.8, blush, 8.5, 2.2), (104, 210, 1.5, mint, 6.5, 4),
-                                     (204, 268, 2, lav, 9, 1.1), (60, 190, 1.4, blush, 7.5, 5.4), (238, 200, 1.6, mint, 8, 3.3)]:
-        out.append(f'<circle class="kn-mote" cx="{x}" cy="{y}" r="{r}" fill="{col}" '
-                   f'style="animation-duration:{dur}s;animation-delay:{delay}s"/>')
-    out += [
-        f'<ellipse class="kn-shadow" cx="150" cy="271" rx="44" ry="5.5" fill="{lav}" opacity=".45"/>',
-        '<g class="kn-all"><g class="kn-hop">',
-        f'<rect x="136" y="246" width="9" height="20" rx="4" fill="{cloak}" stroke="{rim}" stroke-width="1.2"/>',
-        f'<rect x="155" y="246" width="9" height="20" rx="4" fill="{cloak}" stroke="{rim}" stroke-width="1.2"/>',
-        f'<g class="kn-cloak"><path d="M124 170 C110 198 103 228 98 254 C116 247 133 254 150 248 C167 254 184 247 202 254 '
-        f'C197 228 190 198 176 170 Z" fill="{cloak}" stroke="{rim}" stroke-width="1.4" stroke-linejoin="round"/>'
-        f'<path d="M150 200 V242" stroke="{rim}" stroke-width="1" opacity=".35"/></g>',
-        f'<g class="kn-tail"><path d="M168 190 C182 198 198 203 214 199 L211 212 C195 216 179 210 166 200 Z" fill="{lav}" '
-        f'stroke="{lav_dk}" stroke-width="1.2" stroke-linejoin="round"/>'
-        f'<path d="M205 201 L203 213" stroke="{blush}" stroke-width="3"/></g>',
-        f'<path d="M118 180 Q150 198 182 180 L184 191 Q150 211 116 191 Z" fill="{lav}" stroke="{lav_dk}" '
-        f'stroke-width="1.2" stroke-linejoin="round"/>',
-        f'<path d="M120 187 Q150 204 180 187" fill="none" stroke="{blush}" stroke-width="2.2" stroke-linecap="round"/>',
-        '<g class="kn-head">', horn(-1), horn(1),
-        f'<path d="M106 136 C106 98 194 98 194 136 C194 170 176 186 150 186 C124 186 106 170 106 136 Z" fill="{mask}" '
-        f'stroke="{line}" stroke-width="2.2"/>',
-        '<path d="M114 160 C122 176 136 182 150 182" fill="none" stroke="#DCD6F2" stroke-width="2" stroke-linecap="round" opacity=".7"/>',
-        '<g class="kn-eyes"><g class="kn-open"><g class="kn-blink">',
-        f'<ellipse cx="131" cy="143" rx="10.5" ry="16" fill="{eye}"/>',
-        f'<ellipse cx="169" cy="143" rx="10.5" ry="16" fill="{eye}"/>',
-        '<circle cx="127" cy="135" r="2.6" fill="#FFFFFF" opacity=".85"/>',
-        '<circle cx="165" cy="135" r="2.6" fill="#FFFFFF" opacity=".85"/>',
-        '</g></g>',
-        f'<g class="kn-happy" fill="none" stroke="{eye}" stroke-width="4.5" stroke-linecap="round">'
-        '<path d="M121 147 Q131 133 141 147"/><path d="M159 147 Q169 133 179 147"/></g>',
-        '</g>',
-        f'<ellipse cx="121" cy="164" rx="6" ry="3" fill="{blush}" opacity=".55"/>',
-        f'<ellipse cx="179" cy="164" rx="6" ry="3" fill="{blush}" opacity=".55"/>',
-        '</g>',
-        '<g class="kn-q">', d.text(212, 92, "?", "serif-bi", 34, blush), "</g>",
-        star(214, 84, 9, mint, 0), star(90, 100, 6, blush, .15),
-        "</g></g>",
-    ]
-    return "".join(out)
-
-
 # ==========================================================================
-# About: the knight and the text set together in one image, so the knight
-# stays vertically centred beside the text at every window width.
+# About: Wisp and the text set together in one image, so Wisp stays
+# vertically centred beside the text at every window width.
 # ==========================================================================
 ABOUT = [
     [("I study and build ", "sans"), ("systems that stay correct when some of their participants misbehave", "sans-sb"),
@@ -270,9 +161,8 @@ def rich_lines(runs: list, size: float, width: float) -> list:
 
 def about(t: dict, theme: str) -> None:
     size, lead, gap = 15, 25, 15
-    # Same outer edges as the section rules and Instruments: the knight's column
+    # Same outer edges as the section rules and Instruments: Wisp's column
     # starts at RULE_L, the justified text ends exactly at RULE_R.
-    knight_cx = RULE_L + 84
     tx = RULE_L + 186
     tw = RULE_R - tx
     blocks = [rich_lines(p, size, tw) for p in ABOUT]
@@ -284,10 +174,13 @@ def about(t: dict, theme: str) -> None:
     d = Doc(W, H, "About Medwin Jose: " + " ".join("".join(s for s, _ in p) for p in ABOUT))
     d.css.append(f".ab {{ animation: rise 1.2s {EASE_OUT} both; }}")
 
-    # Knight, scaled to the text block and centred on it.
-    s = min(.74, (text_h + 8) / 236)
-    kx, ky = knight_cx - 150 * s, top + text_h / 2 - 160 * s - 4
-    d.add(f'<g transform="translate({kx:.1f},{ky:.1f}) scale({s:.3f})">{knight_parts(d)}</g>')
+    # Wisp (drawn in a 1000-unit space) fills its column exactly: its leftmost mark sits on
+    # the rule's left end, its rightmost (the scarf tail) stops 20px short of the text.
+    x0, x1 = EXTENT_X
+    s = (tx - 20 - RULE_L) / (x1 - x0)
+    wx = RULE_L - x0 * s
+    wy = top + text_h / 2 - (EXTENT_Y[0] + EXTENT_Y[1]) / 2 * s
+    d.add(f'<g transform="translate({wx:.1f},{wy:.1f}) scale({s})">{wisp_parts(d, t, theme == "dark")}</g>')
 
     y = top + 15  # first baseline: cap-height of 15px Inter sits on the block's top edge
     k = 0
@@ -568,7 +461,7 @@ def instruments(t: dict, theme: str) -> None:
 
 
 def footer(t: dict, theme: str) -> None:
-    top = SECTION_TOP + 6  # follows a caption line, which sits slightly lower than an image
+    top = SECTION_TOP + 12  # follows the city image, whose caption line sits at its bottom edge
     d = Doc(W, top + 82, "Thank you for reading")
     cx, y = W / 2, top + 4
     d.css.append(f"""

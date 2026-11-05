@@ -53,8 +53,6 @@
   <img alt="An isometric city in which every building is one day of my GitHub contributions over the last year" src="assets/city-light.svg" width="100%">
 </picture>
 
-<sub><i>Each building is one day; its height is that day's contributions. Rebuilt every few minutes from my GitHub activity.</i></sub>
-
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/footer-dark.svg">
   <img alt="Thank you for reading" src="assets/footer-light.svg" width="100%">
