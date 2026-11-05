@@ -118,7 +118,9 @@ def _css() -> str:
   47.5%, 58% {{ transform: translate(4px, -4px) rotate(4deg) }}
   62%, 72%  {{ transform: rotate(2deg) }}
   76%, 84%  {{ transform: rotate(5deg) }}
-  89%, 100% {{ transform: none }} }}
+  89%       {{ transform: none }}
+  91.2%     {{ transform: translateY(5px) rotate(-1.5deg) }}
+  93.6%, 100% {{ transform: none }} }}
 .wp-eyes   {{ animation: wpGlance {L}s {GLIDE} infinite; }}
 @keyframes wpGlance {{
   0%, 5.6%  {{ transform: none }}
@@ -164,6 +166,29 @@ def _css() -> str:
 @keyframes wpGlint {{ 0%, 76% {{ opacity: 0; transform: scale(.2) }} 78% {{ opacity: 1; transform: scale(1.1) rotate(20deg) }}
   82% {{ opacity: 1; transform: scale(1) rotate(45deg) }} 85%, 100% {{ opacity: 0; transform: scale(.3) }} }}
 @media (prefers-reduced-motion: reduce) {{ .wp-happy, .wp-wink, .wp-q {{ display: none }} }}
+/* ---------- level-up: personality and secondary motion ---------- */
+/* blinks that happen with a turn of the head, the way people blink when they look away */
+.wp-tblink {{ transform-box: fill-box; transform-origin: center; animation: wpTBlink {L}s linear infinite; }}
+@keyframes wpTBlink {{
+  0%, 7.9%, 9.1%, 18.9%, 20.1%, 45.9%, 47.1%, 100% {{ transform: none }}
+  8.5%, 19.5%, 46.5% {{ transform: scaleY(.06) }} }}
+/* a small foot tap while glancing right */
+.wp-footr  {{ transform-box: fill-box; transform-origin: 15% 100%; animation: wpTap {L}s ease-in-out infinite; }}
+@keyframes wpTap {{ 0%, 21.5%, 23%, 24%, 25.5%, 100% {{ transform: none }} 22.25%, 24.75% {{ transform: translateY(-6px) rotate(-7deg) }} }}
+/* catchlights shimmer softly */
+.wp-catch  {{ transform-box: fill-box; transform-origin: center; animation: wpCatch 4.2s {SINE} infinite alternate; }}
+@keyframes wpCatch {{ from {{ opacity: .82; transform: scale(.94) }} to {{ opacity: 1; transform: scale(1.06) }} }}
+/* the scarf wrap swells a touch with each breath */
+.wp-wrap   {{ transform-box: fill-box; transform-origin: 50% 60%; animation: wpWrap 3.2s {SINE} infinite alternate; }}
+@keyframes wpWrap {{ from {{ transform: scale(1, 1) }} to {{ transform: scale(1.01, 1.03) }} }}
+/* the hem follows the cloak a beat late */
+.wp-hem    {{ transform-box: fill-box; transform-origin: 50% 0; animation: wpHem 3.6s {SINE} -.6s infinite alternate; }}
+@keyframes wpHem {{ from {{ transform: skewX(1.6deg) }} to {{ transform: skewX(-1.6deg) }} }}
+/* once per loop, a shooting star crosses the upper sky */
+.wp-shoot  {{ animation: wpShoot {L}s linear infinite; opacity: 0; }}
+@keyframes wpShoot {{ 0%, 86% {{ opacity: 0; transform: translate(0, 0) }} 86.6% {{ opacity: 1 }}
+  89% {{ opacity: 0; transform: translate(-230px, 64px) }} 100% {{ opacity: 0; transform: translate(-230px, 64px) }} }}
+@media (prefers-reduced-motion: reduce) {{ .wp-shoot {{ display: none }} }}
 /* ---------- world ---------- */
 .wp-shadow {{ transform-box: fill-box; transform-origin: center; animation: wpShadow 3.2s {SINE} infinite alternate; }}
 @keyframes wpShadow {{ from {{ transform: scaleX(1); opacity: 1 }} to {{ transform: scaleX(.9); opacity: .72 }} }}
@@ -202,6 +227,9 @@ def wisp_background(d, t: dict, dark: bool) -> str:
         f'<stop offset="1" stop-color="{butter}" stop-opacity="0"/></radialGradient>'
         f'<radialGradient id="wp-moonfill" cx=".35" cy=".35" r=".75"><stop offset="0" stop-color="#FFF6DA"/>'
         f'<stop offset="1" stop-color="{butter}"/></radialGradient>'
+        f'<linearGradient id="wp-streak" x1="880" y1="92" x2="838" y2="104" gradientUnits="userSpaceOnUse">'
+        f'<stop offset="0" stop-color="{hi}" stop-opacity="0"/><stop offset="1" stop-color="{hi}" stop-opacity=".95"/>'
+        f'</linearGradient>'
         f'<mask id="wp-crescent"><rect x="150" y="80" width="200" height="200" fill="#fff"/>'
         f'<circle cx="266" cy="160" r="30" fill="#000"/></mask>'
     )
@@ -220,6 +248,9 @@ def wisp_background(d, t: dict, dark: bool) -> str:
         f'<circle class="wp-moonglow" cx="248" cy="172" r="64" fill="url(#wp-moonglow)"/>',
         f'<circle cx="248" cy="172" r="30" fill="url(#wp-moonfill)" mask="url(#wp-crescent)"/>',
         '</g>',
+        # a shooting star, once per loop
+        f'<g class="wp-shoot"><path d="M880 92 L838 104" stroke="url(#wp-streak)" stroke-width="3.2" stroke-linecap="round"/>'
+        f'<circle cx="838" cy="104" r="3.2" fill="{hi}"/></g>',
         '<g class="wp-sky">',
     ]
     for (x, y, r, dur, delay, col) in [(214, 318, 22, 4.6, 0, butter), (842, 270, 18, 5.4, 1.3, butter),
@@ -279,6 +310,24 @@ def wisp_character(d, dark: bool) -> str:
         '<radialGradient id="wp-cheek"><stop offset="0" stop-color="#F7B4D1" stop-opacity=".8"/>'
         '<stop offset="1" stop-color="#F7B4D1" stop-opacity="0"/></radialGradient>'
         f'<clipPath id="wp-headclip"><path d="{HEAD}"/></clipPath>'
+        f'<clipPath id="wp-cloakclip"><path d="{CLOAK}"/></clipPath>'
+        f'<clipPath id="wp-wrapclip"><path d="{WRAP}"/></clipPath>'
+        # warm moonlight rim on the head's upper-left edge (dark pages)
+        '<linearGradient id="wp-moonrim" x1="300" y1="160" x2="520" y2="420" gradientUnits="userSpaceOnUse">'
+        '<stop offset="0" stop-color="#FFE7B8" stop-opacity=".75"/><stop offset="1" stop-color="#FFE7B8" stop-opacity="0"/>'
+        '</linearGradient>'
+        # lavender light bounced up from the scarf onto the underside of the head
+        '<radialGradient id="wp-bounce" cx="490" cy="600" r="190" gradientUnits="userSpaceOnUse">'
+        '<stop offset="0" stop-color="#A994F0" stop-opacity=".34"/><stop offset=".6" stop-color="#A994F0" stop-opacity=".12"/>'
+        '<stop offset="1" stop-color="#A994F0" stop-opacity="0"/>'
+        '</radialGradient>'
+        # contact shadows: under the scarf on the cloak, under the head on the scarf
+        '<linearGradient id="wp-undercast" x1="0" y1="630" x2="0" y2="700" gradientUnits="userSpaceOnUse">'
+        '<stop offset="0" stop-color="#0B0620" stop-opacity=".55"/><stop offset="1" stop-color="#0B0620" stop-opacity="0"/>'
+        '</linearGradient>'
+        '<linearGradient id="wp-headcast" x1="0" y1="540" x2="0" y2="600" gradientUnits="userSpaceOnUse">'
+        '<stop offset="0" stop-color="#3A2A7C" stop-opacity=".45"/><stop offset="1" stop-color="#3A2A7C" stop-opacity="0"/>'
+        '</linearGradient>'
         f'<clipPath id="wp-tailclip"><path d="{TAIL}"/></clipPath>'
     )
     rim = (f'<path d="{HEAD}" fill="none" stroke="#B7AAFF" stroke-opacity=".24" stroke-width="22" '
@@ -287,13 +336,13 @@ def wisp_character(d, dark: bool) -> str:
     def eye(i: int, side: str):
         cx, cy = EYES[i]
         rot = f'rotate(-7.5 {cx} {cy})'
-        opened = (f'<g class="wp-open{side}"><g class="wp-blink"><g transform="{rot}">'
+        opened = (f'<g class="wp-open{side}"><g class="wp-blink"><g class="wp-tblink"><g transform="{rot}">'
                   f'<ellipse cx="{cx}" cy="{cy}" rx="46" ry="63.5" fill="url(#wp-eye)"/>'
                   f'<ellipse cx="{cx + 2}" cy="{cy + 30}" rx="32" ry="20" fill="url(#wp-iris)"/>'
-                  f'<ellipse cx="{cx - 20}" cy="{cy - 24}" rx="9.5" ry="14" fill="#FFFFFF" '
-                  f'transform="rotate(-10 {cx - 20} {cy - 24})"/>'
+                  f'<g class="wp-catch"><ellipse cx="{cx - 20}" cy="{cy - 24}" rx="9.5" ry="14" fill="#FFFFFF" '
+                  f'transform="rotate(-10 {cx - 20} {cy - 24})"/></g>'
                   f'<circle cx="{cx + 16}" cy="{cy + 24}" r="4.6" fill="#FFFFFF" opacity=".72"/>'
-                  f'</g></g></g>')
+                  f'</g></g></g></g>')
         happy = (f'<path d="M{cx - 38} {cy + 14} Q{cx} {cy - 38} {cx + 38} {cy + 14}" transform="{rot}" '
                  f'fill="none" stroke="{INK}" stroke-width="13" stroke-linecap="round"/>')
         return opened, happy
@@ -309,21 +358,40 @@ def wisp_character(d, dark: bool) -> str:
         '<g class="wp-bob"><g class="wp-hop"><g class="wp-squash">',
         # feet: same outline as everything else, a faint top light so they read on dark pages
         f'<rect x="428" y="852" width="66" height="42" rx="20" fill="url(#wp-feet)" {line}/>',
+        '<path d="M442 862 H478" stroke="#5A4A96" stroke-width="4" stroke-linecap="round" opacity=".7"/>',
+        '<g class="wp-footr">',
         f'<rect x="530" y="852" width="66" height="42" rx="20" fill="url(#wp-feet)" {line}/>',
-        '<path d="M442 862 H478 M544 862 H580" stroke="#5A4A96" stroke-width="4" stroke-linecap="round" opacity=".7"/>',
+        '<path d="M544 862 H580" stroke="#5A4A96" stroke-width="4" stroke-linecap="round" opacity=".7"/>',
+        '</g>',
         # cloak: breathes from the feet, sways from the shoulders
         '<g class="wp-breath"><g class="wp-cloak">',
         (f'<path d="{CLOAK}" fill="none" stroke="#B7AAFF" stroke-opacity=".2" stroke-width="18" '
          f'stroke-linejoin="round"/>') if dark else "",
         f'<path d="{CLOAK}" fill="url(#wp-cloak)" {line}/>',
         f'<path d="{CLOAK_SHEEN}" fill="url(#wp-cloaksheen)"/>',
+        # cloth folds: a soft shadow crease with a faint lit edge beside it
+        '<g clip-path="url(#wp-cloakclip)" fill="none" stroke-linecap="round">',
+        '<path d="M470 668 C463 728 455 786 447 846" stroke="#120B30" stroke-opacity=".42" stroke-width="7"/>',
+        '<path d="M480 672 C474 730 467 788 460 846" stroke="#5E4CB0" stroke-opacity=".2" stroke-width="3"/>',
+        '<path d="M560 664 C571 724 585 782 598 842" stroke="#120B30" stroke-opacity=".38" stroke-width="6"/>',
+        '<path d="M550 668 C560 726 572 784 584 842" stroke="#5E4CB0" stroke-opacity=".18" stroke-width="2.6"/>',
+        '<rect x="330" y="625" width="380" height="80" fill="url(#wp-undercast)" stroke="none"/>',
+        '</g>',
+        '<g class="wp-hem">',
         f'<path d="{HEM}" fill="url(#wp-hem)" stroke="{OUTLINE}" stroke-width="3" stroke-linejoin="round"/>',
+        '<path d="M352 829 C410 846 470 850 512 850 C570 850 630 842 680 826" fill="none" stroke="#9C88EC" '
+        'stroke-opacity=".45" stroke-width="2.4" stroke-linecap="round"/>',
+        '</g>',
         '</g></g>',
         # scarf tail: flutters from the knot; a second, faster layer makes the end lag
         '<g class="wp-tail"><g class="wp-tail2">',
         f'<path d="{TAIL}" fill="url(#wp-scarf)" {line}/>',
         '<path d="M650 600 C700 606 742 592 778 568 C820 540 864 528 906 525" fill="none" '
         'stroke="url(#wp-tailsheen)" stroke-width="16" stroke-linecap="round" clip-path="url(#wp-tailclip)"/>',
+        '<g clip-path="url(#wp-tailclip)" fill="none" stroke="#4E37A0" stroke-linecap="round">',
+        '<path d="M700 640 C742 634 776 612 806 592 C836 574 866 566 900 566" stroke-opacity=".32" stroke-width="5"/>',
+        '<path d="M760 655 C790 646 820 628 852 616 C870 610 886 608 898 608" stroke-opacity=".22" stroke-width="4"/>',
+        '</g>',
         '</g></g>',
         # head: idle drift wraps the expression turns
         '<g class="wp-idle"><g class="wp-head">',
@@ -331,6 +399,8 @@ def wisp_character(d, dark: bool) -> str:
         f'<path d="{HEAD}" fill="url(#wp-head)" {line}/>',
         f'<path d="{HEAD}" fill="url(#wp-headform)"/>',
         '<g clip-path="url(#wp-headclip)">',
+        '<circle cx="490" cy="600" r="190" fill="url(#wp-bounce)"/>',  # shape = full gradient: fades to nothing
+        (f'<path d="{HEAD}" fill="none" stroke="url(#wp-moonrim)" stroke-width="16"/>' if dark else ""),
         '<ellipse class="wp-gloss" cx="395" cy="255" rx="95" ry="52" fill="url(#wp-gloss)" transform="rotate(-32 395 255)"/>',
         '<g class="wp-blush">',
         # cheeks sit just below and outside each eye, well inside the outline
@@ -342,10 +412,15 @@ def wisp_character(d, dark: bool) -> str:
         f'<g class="wp-wink">{wink}</g>',
         '</g></g>',
         # scarf wrap (over the neck)
+        '<g class="wp-wrap">',
         f'<path d="{WRAP}" fill="url(#wp-scarf)" {line}/>',
+        f'<rect x="395" y="530" width="255" height="80" fill="url(#wp-headcast)" clip-path="url(#wp-wrapclip)"/>',
         f'<path d="{WRAP_FOLD}" fill="url(#wp-fold)"/>',
         '<path d="M466 590 C522 582 580 568 628 555" fill="none" stroke="#EEE7FF" stroke-opacity=".45" '
         'stroke-width="6" stroke-linecap="round"/>',
+        '<path d="M470 628 C530 620 590 602 632 586" fill="none" stroke="#4E37A0" stroke-opacity=".3" '
+        'stroke-width="4" stroke-linecap="round"/>',
+        '</g>',
         '</g></g></g>',
     ])
 
@@ -359,11 +434,13 @@ def wisp_foreground(d, t: dict, dark: bool) -> str:
         f'<g transform="{tilt}">',
         f'<path d="{front}" fill="none" stroke="{acc}" stroke-width="4.5" stroke-opacity="{.58 if dark else .48}" '
         f'stroke-linecap="round"/>',
-        f'<circle r="7" fill="{t["accent_hi"]}" opacity="0">'
-        f'<animateMotion path="{front}" dur="9s" keyPoints="0;1;1" keyTimes="0;.6;1" calcMode="spline" '
+        f'<radialGradient id="wp-comet" cx=".8" cy=".5" r=".8"><stop offset="0" stop-color="{t["accent_hi"]}"/>'
+        f'<stop offset="1" stop-color="{t["accent_hi"]}" stop-opacity="0"/></radialGradient>'
+        f'<ellipse rx="20" ry="5" fill="url(#wp-comet)" opacity="0">'
+        f'<animateMotion path="{front}" dur="9s" rotate="auto" keyPoints="0;1;1" keyTimes="0;.6;1" calcMode="spline" '
         f'keySplines=".37 0 .63 1;0 0 1 1" repeatCount="indefinite"/>'
         f'<animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;.1;.5;.6;1" dur="9s" repeatCount="indefinite"/>'
-        f'</circle>',
+        f'</ellipse>',
         '</g>',
         '<g class="wp-q">', d.text(722, 252, "?", "serif-bi", 170, blush), '</g>',
         f'<circle class="wp-dot" cx="712" cy="268" r="11" fill="{acc}"/>',

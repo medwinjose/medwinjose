@@ -23,7 +23,7 @@ import urllib.request
 from svgkit import EASE_OUT, THEMES, Doc, diamond, fmt
 
 W, SCENE_H = 840, 416
-CAPTION_H = 31     # caption line set inside the image, so it never reflows with the window
+CAPTION_H = 55     # caption set inside the image (never reflows), with clear air below the legend
 H = SCENE_H + CAPTION_H
 CAPTION = ("Each building is one day; its height is that day's contributions. "
            "Rebuilt every few minutes from my GitHub activity.")
@@ -308,7 +308,7 @@ def render(days: list[tuple[dt.date, int]], theme: str, live: bool) -> Doc:
         doc.add(f'<rect x="{fmt(x)}" y="{fmt(ly - hh + 1)}" width="7" height="{fmt(hh)}" rx="1" fill="{col}"/>')
         x += 11
     doc.add(doc.text(x + 6, ly, "BUSY", "sans-m", 7.5, t["muted"], tracking=1.6), "</g>")
-    doc.add('<g class="cap">', doc.text(W / 2, SCENE_H + 22, CAPTION, "serif-i", 15.5, t["soft"], anchor="middle"), "</g>")
+    doc.add('<g class="cap">', doc.text(W / 2, SCENE_H + 48, CAPTION, "serif-i", 15.5, t["soft"], anchor="middle"), "</g>")
     return doc
 
 
