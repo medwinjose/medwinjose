@@ -118,17 +118,20 @@ def _css() -> str:
   47.5%, 58% {{ transform: translate(4px, -4px) rotate(4deg) }}
   62%, 72%  {{ transform: rotate(2deg) }}
   76%, 84%  {{ transform: rotate(5deg) }}
-  89%       {{ transform: none }}
+  86.2%, 88.4% {{ transform: translate(3px, -3px) rotate(2.5deg) }}
+  89.6%     {{ transform: none }}
   91.2%     {{ transform: translateY(5px) rotate(-1.5deg) }}
   93.6%, 100% {{ transform: none }} }}
 .wp-eyes   {{ animation: wpGlance {L}s {GLIDE} infinite; }}
 @keyframes wpGlance {{
   0%, 5.6%  {{ transform: none }}
-  8.6%, 16% {{ transform: translate(-22px, 2px) }}
+  8.6%, 16% {{ transform: translate(-22px, -9px) }}  /* up-left: toward the moon */
   19.6%, 27% {{ transform: translate(22px, 0) }}
   31%, 43%  {{ transform: translate(-6px, 5px) }}
   47%, 58%  {{ transform: translate(12px, -20px) }}
-  61%, 100% {{ transform: none }} }}
+  61%, 85%  {{ transform: none }}
+  86.2%, 88.4% {{ transform: translate(17px, -19px) }}  /* follows the shooting star */
+  90%, 100% {{ transform: none }} }}
 .wp-blink  {{ transform-box: fill-box; transform-origin: center; animation: wpBlink 7.6s ease-in-out infinite; }}
 @keyframes wpBlink {{
   0%, 26%, 30%, 72%, 75.5%, 77%, 80.5%, 100% {{ transform: none }}
@@ -170,7 +173,8 @@ def _css() -> str:
 /* blinks that happen with a turn of the head, the way people blink when they look away */
 .wp-tblink {{ transform-box: fill-box; transform-origin: center; animation: wpTBlink {L}s linear infinite; }}
 @keyframes wpTBlink {{
-  0%, 7.9%, 9.1%, 18.9%, 20.1%, 45.9%, 47.1%, 100% {{ transform: none }}
+  0%, 1.8%, 5.2%, 7.9%, 9.1%, 18.9%, 20.1%, 45.9%, 47.1%, 100% {{ transform: none }}
+  3%, 4.2%  {{ transform: scaleY(.42) }}  /* a slow, content "cat blink" */
   8.5%, 19.5%, 46.5% {{ transform: scaleY(.06) }} }}
 /* a small foot tap while glancing right */
 .wp-footr  {{ transform-box: fill-box; transform-origin: 15% 100%; animation: wpTap {L}s ease-in-out infinite; }}
@@ -189,6 +193,18 @@ def _css() -> str:
 @keyframes wpShoot {{ 0%, 86% {{ opacity: 0; transform: translate(0, 0) }} 86.6% {{ opacity: 1 }}
   89% {{ opacity: 0; transform: translate(-230px, 64px) }} 100% {{ opacity: 0; transform: translate(-230px, 64px) }} }}
 @media (prefers-reduced-motion: reduce) {{ .wp-shoot {{ display: none }} }}
+/* the moon's glow swells a little while Wisp looks up at it */
+.wp-notice {{ transform-box: fill-box; transform-origin: center; animation: wpNotice {L}s {SINE} infinite; }}
+@keyframes wpNotice {{ 0%, 8.5% {{ transform: none }} 11.5%, 15% {{ transform: scale(1.22) }} 18.5%, 100% {{ transform: none }} }}
+/* a soft breeze after looking right, and a joy flick with the hop */
+.wp-gust   {{ transform-box: fill-box; transform-origin: 0 22%; animation: wpGust {L}s {SINE} infinite; }}
+@keyframes wpGust {{ 0%, 27.5% {{ transform: none }} 29% {{ transform: rotate(7deg) scaleX(1.03) }}
+  30.6% {{ transform: rotate(-2deg) }} 32% {{ transform: rotate(2.5deg) }} 33.5%, 62.8% {{ transform: none }}
+  64.2% {{ transform: rotate(6deg) scaleX(1.02) }} 65.8% {{ transform: rotate(-1.5deg) }} 67.4%, 100% {{ transform: none }} }}
+.wp-gm     {{ animation: wpGm {L}s ease-out infinite; opacity: 0; }}
+@keyframes wpGm {{ 0%, 28.6% {{ opacity: 0; transform: translate(0, 0) }} 29.2% {{ opacity: .85 }}
+  33.5%, 100% {{ opacity: 0; transform: translate(46px, -18px) }} }}
+@media (prefers-reduced-motion: reduce) {{ .wp-gm {{ display: none }} }}
 /* ---------- world ---------- */
 .wp-shadow {{ transform-box: fill-box; transform-origin: center; animation: wpShadow 3.2s {SINE} infinite alternate; }}
 @keyframes wpShadow {{ from {{ transform: scaleX(1); opacity: 1 }} to {{ transform: scaleX(.9); opacity: .72 }} }}
@@ -245,7 +261,7 @@ def wisp_background(d, t: dict, dark: bool) -> str:
         f'stroke-opacity="{.34 if dark else .3}" stroke-linecap="round"/>',
         # crescent moon, floating gently, with a breathing glow
         '<g class="wp-moon">',
-        f'<circle class="wp-moonglow" cx="248" cy="172" r="64" fill="url(#wp-moonglow)"/>',
+        f'<g class="wp-notice"><circle class="wp-moonglow" cx="248" cy="172" r="64" fill="url(#wp-moonglow)"/></g>',
         f'<circle cx="248" cy="172" r="30" fill="url(#wp-moonfill)" mask="url(#wp-crescent)"/>',
         '</g>',
         # a shooting star, once per loop
@@ -384,7 +400,7 @@ def wisp_character(d, dark: bool) -> str:
         '</g>',
         '</g></g>',
         # scarf tail: flutters from the knot; a second, faster layer makes the end lag
-        '<g class="wp-tail"><g class="wp-tail2">',
+        '<g class="wp-tail"><g class="wp-tail2"><g class="wp-gust">',
         f'<path d="{TAIL}" fill="url(#wp-scarf)" {line}/>',
         '<path d="M650 600 C700 606 742 592 778 568 C820 540 864 528 906 525" fill="none" '
         'stroke="url(#wp-tailsheen)" stroke-width="16" stroke-linecap="round" clip-path="url(#wp-tailclip)"/>',
@@ -392,7 +408,7 @@ def wisp_character(d, dark: bool) -> str:
         '<path d="M700 640 C742 634 776 612 806 592 C836 574 866 566 900 566" stroke-opacity=".32" stroke-width="5"/>',
         '<path d="M760 655 C790 646 820 628 852 616 C870 610 886 608 898 608" stroke-opacity=".22" stroke-width="4"/>',
         '</g>',
-        '</g></g>',
+        '</g></g></g>',
         # head: idle drift wraps the expression turns
         '<g class="wp-idle"><g class="wp-head">',
         rim,
@@ -449,6 +465,9 @@ def wisp_foreground(d, t: dict, dark: bool) -> str:
         f'<path class="wp-burst" d="{_star(745, 230, 30)}" fill="{mint}"/>',
         f'<path class="wp-burst" d="{_star(300, 190, 20)}" fill="{blush}" style="animation-delay:.15s"/>',
         f'<path class="wp-glint" d="{_star(690, 330, 18)}" fill="{butter}"/>',
+        # two tiny motes carried off the scarf tip by the breeze
+        f'<circle class="wp-gm" cx="902" cy="548" r="5" fill="{t["accent_hi"]}"/>',
+        f'<circle class="wp-gm" cx="896" cy="600" r="3.6" fill="{acc}" style="animation-delay:.25s"/>',
     ])
 
 
